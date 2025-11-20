@@ -1,0 +1,531 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login / Sign Up</title>
+    <link rel="stylesheet" href="CSS/Menu.css">
+    <link rel="stylesheet" href="CSS/Login.css">
+    <style>
+        /* Password visibility toggle styling */
+        .password-field-wrapper {
+            position: relative;
+            display: flex;
+            align-items: center;
+        }
+
+        .password-field-wrapper input {
+            width: 100%;
+            padding-right: 40px;
+        }
+
+        .toggle-password-btn {
+            position: absolute;
+            right: 10px;
+            background: none;
+            border: none;
+            cursor: pointer;
+            font-size: 1.2em;
+            color: #666;
+            padding: 5px;
+            z-index: 10;
+        }
+
+        .toggle-password-btn:hover {
+            color: #BC1823;
+        }
+
+        /* Two-column layout for sign-up names */
+        .form-group-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+        }
+
+        .form-group-row .form-group {
+            margin-bottom: 0;
+        }
+
+        @media (max-width: 480px) {
+            .form-group-row {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        /* Contact number styling */
+        .contact-number-info {
+            font-size: 0.85em;
+            color: #666;
+            margin-top: 3px;
+        }
+
+        .password-info {
+            font-size: 0.85em;
+            color: #666;
+            margin-top: 3px;
+        }
+
+        /* Error message styling */
+        .error-message {
+            color: #BC1823;
+            font-size: 0.9em;
+            margin-top: 5px;
+        }
+
+        .success-message {
+            color: #008000;
+            font-size: 0.9em;
+            margin-top: 5px;
+        }
+    </style>
+</head>
+<body>
+
+    <header>
+        <div class="logo">
+            <img src="Photo/Tabeya Name.png" alt="Tabeya Logo">
+        </div>
+        <nav>
+            <a href="index.html" >HOME</a> 
+            <a href="Menu.html" >MENU</a>
+            <a href="CaterReservation.html">CATER RESERVATION</a>
+            <a href="GALLERY.html">GALLERY</a>
+            <a href="Review.html">TESTIMONY</a>
+            <a href="About.html">ABOUT</a>
+            <a href="Login.html" class="active">PROFILE</a>
+            <div class="cart-icon" id="view-cart-btn">
+                🛒 <span class="cart-count" id="cart-item-count">0</span>
+            </div>
+        </nav>
+    </header>
+
+    <div class="login-container">
+        <div id="form-content"></div>
+    </div>
+
+    <footer>
+        <div class="contact-section">
+            <div class="container">
+                <div class="contact-info">
+                    <h2>Contact Us</h2>
+                    <p>Have any questions? We'd love to hear from you.</p>
+                    <div class="info-group">
+                        <div class="info-item visit-us">
+                            <img src="Photo/VisitUs.png" alt="Location Icon" class="icon">
+                            <div>
+                                <strong>Visit us</strong>
+                                <p>Poblacion 2, Vinzons Avenue,<br>Vinzons, Camarines Norte</p>
+                            </div>
+                        </div>
+                        <div class="info-item call-us">
+                            <img src="Photo/Selpon.png" alt="Phone Icon" class="icon">
+                            <div>
+                                <strong>Call us</strong>
+                                <p>09380839641</p>
+                            </div>
+                        </div>
+                        <div class="info-item connect-us">
+                            <img src="Photo/Facebook.png" alt="Facebook Icon" class="icon">
+                            <div>
+                                <strong>Connect to us</strong>
+                                <a href="https://www.facebook.com/profile.php?id=100063540027038" target="_blank" class="no-underline">Tabeya, VCN</a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+    const formContent = document.getElementById('form-content');
+    let isLoginMode = true;
+
+    // --- TOGGLE PASSWORD VISIBILITY ---
+    function togglePasswordVisibility(fieldId, button) {
+        const field = document.getElementById(fieldId);
+        if (field.type === 'password') {
+            field.type = 'text';
+            button.textContent = '🙈';
+        } else {
+            field.type = 'password';
+            button.textContent = '👁️';
+        }
+    }
+
+    // --- 1. RENDER LOGIN FORM HTML ---
+    function renderLoginForm() {
+        formContent.innerHTML = `
+            <h2>LOG IN</h2>
+            <form id="login-form"> 
+                <div class="form-group">
+                    <label for="login-email">Email</label>
+                    <input type="email" id="login-email" name="email" required>
+                </div>
+                <div class="form-group">
+                    <label for="login-password">Password</label>
+                    <div class="password-field-wrapper">
+                        <input type="password" id="login-password" name="password" required>
+                        <button type="button" class="toggle-password-btn" id="toggle-login-password" title="Show/Hide Password">
+                            👁️
+                        </button>
+                    </div>
+                </div>
+                <button type="submit">LOG IN</button>
+            </form>
+            <div class="login-options">
+                Don't have an account? <a href="#" id="switch-to-signup">Sign Up</a>
+            </div>
+        `;
+        document.getElementById('login-form').addEventListener('submit', handleLogin);
+        
+        document.getElementById('toggle-login-password').addEventListener('click', function(e) {
+            e.preventDefault();
+            togglePasswordVisibility('login-password', this);
+        });
+        
+        document.getElementById('switch-to-signup').addEventListener('click', (e) => {
+            e.preventDefault();
+            isLoginMode = false;
+            renderSignupForm();
+        });
+    }
+
+    // --- 2. RENDER SIGN-UP FORM HTML ---
+    function renderSignupForm() {
+        formContent.innerHTML = `
+            <h2>SIGN UP</h2>
+            <form id="signup-form"> 
+                <div class="form-group-row">
+                    <div class="form-group">
+                        <label for="signup-firstname">First Name</label>
+                        <input type="text" id="signup-firstname" name="firstname" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="signup-lastname">Last Name</label>
+                        <input type="text" id="signup-lastname" name="lastname" required>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="signup-email">Email</label>
+                    <input type="email" id="signup-email" name="email" required>
+                </div>
+                <div class="form-group">
+                    <label for="signup-contactnumber">Contact Number</label>
+                    <input type="tel" id="signup-contactnumber" name="contactnumber" 
+                           placeholder="09XXXXXXXXX" maxlength="11" required>
+                    <div class="contact-number-info">Format: 09XXXXXXXXX (11 digits)</div>
+                </div>
+                <div class="form-group">
+                    <label for="signup-password">Password</label>
+                    <div class="password-field-wrapper">
+                        <input type="password" id="signup-password" name="password" required>
+                        <button type="button" class="toggle-password-btn" id="toggle-signup-password" title="Show/Hide Password">
+                            👁️
+                        </button>
+                    </div>
+                    <div class="password-info">Min 6 chars, 1 uppercase, 1 number</div>
+                </div>
+                <div class="form-group">
+                    <label for="signup-confirm-password">Confirm Password</label>
+                    <div class="password-field-wrapper">
+                        <input type="password" id="signup-confirm-password" name="confirm_password" required>
+                        <button type="button" class="toggle-password-btn" id="toggle-confirm-password" title="Show/Hide Password">
+                            👁️
+                        </button>
+                    </div>
+                    <p id="password-match-message" style="display: none;"></p>
+                </div>
+                <button type="submit" id="signup-button" disabled>SIGN UP</button>
+            </form>
+            <div class="login-options">
+                Already have an account? <a href="#" id="switch-to-login">Log In</a>
+            </div>
+        `;
+        
+        document.getElementById('signup-form').addEventListener('submit', handleSignup);
+        
+        document.getElementById('toggle-signup-password').addEventListener('click', function(e) {
+            e.preventDefault();
+            togglePasswordVisibility('signup-password', this);
+        });
+
+        document.getElementById('toggle-confirm-password').addEventListener('click', function(e) {
+            e.preventDefault();
+            togglePasswordVisibility('signup-confirm-password', this);
+        });
+        
+        document.getElementById('switch-to-login').addEventListener('click', (e) => {
+            e.preventDefault();
+            isLoginMode = true;
+            renderLoginForm();
+        });
+
+        const passwordInput = document.getElementById('signup-password');
+        const confirmInput = document.getElementById('signup-confirm-password');
+        const messageElement = document.getElementById('password-match-message');
+        const signupButton = document.getElementById('signup-button');
+
+        function validatePasswords() {
+            const password = passwordInput.value;
+            const confirmPassword = confirmInput.value;
+            
+            if (password && confirmPassword) {
+                if (password === confirmPassword) {
+                    messageElement.style.display = 'block';
+                    messageElement.textContent = 'Passwords Match!';
+                    messageElement.style.backgroundColor = '#008000';
+                    messageElement.style.color = '#fff';
+                    messageElement.style.padding = '8px 10px';
+                    messageElement.style.borderRadius = '4px';
+                    messageElement.style.marginTop = '5px';
+                    signupButton.disabled = false;
+                } else {
+                    messageElement.style.display = 'block';
+                    messageElement.textContent = 'Passwords do not match.';
+                    messageElement.style.backgroundColor = '#BC1823';
+                    messageElement.style.color = '#fff';
+                    messageElement.style.padding = '8px 10px';
+                    messageElement.style.borderRadius = '4px';
+                    messageElement.style.marginTop = '5px';
+                    signupButton.disabled = true;
+                }
+            } else {
+                messageElement.style.display = 'none';
+                signupButton.disabled = true;
+            }
+        }
+        
+        passwordInput.addEventListener('input', validatePasswords);
+        confirmInput.addEventListener('input', validatePasswords);
+    }
+
+    
+    
+  // --- 4. HANDLE SIGNUP ---
+async function handleSignup(e) {
+    e.preventDefault();
+    
+    const firstName = document.getElementById('signup-firstname').value;
+    const lastName = document.getElementById('signup-lastname').value;
+    const email = document.getElementById('signup-email').value;
+    const contactNumber = document.getElementById('signup-contactnumber').value;
+    const password = document.getElementById('signup-password').value;
+    const confirmPassword = document.getElementById('signup-confirm-password').value;
+    
+    if (!firstName || !lastName) {
+        alert("Please enter first and last name");
+        return;
+    }
+    
+    if (password !== confirmPassword) {
+        alert("Passwords do not match!");
+        return;
+    }
+    
+    try {
+        // ✅ FIX: Use absolute path from your project root
+        const apiUrl = window.location.origin + window.location.pathname.replace('Login.html', '') + 'api/auth/authentication.php?action=register';
+        
+        console.log('Attempting registration to:', apiUrl); // Debug log
+        
+        const response = await fetch(apiUrl, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-Requested-With': 'XMLHttpRequest'
+            },
+            body: JSON.stringify({
+                firstName: firstName,
+                lastName: lastName,
+                email: email,
+                contactNumber: contactNumber,
+                password: password
+            }),
+            credentials: 'include'
+        });
+        
+        console.log('Response status:', response.status); // Debug log
+        
+        // ✅ CHECK IF RESPONSE IS OK BEFORE PARSING JSON
+        if (!response.ok) {
+            const text = await response.text();
+            console.error('Server response:', text);
+            alert('Server error: ' + response.status + '\n' + text.substring(0, 200));
+            return;
+        }
+        
+        // ✅ TRY TO GET TEXT FIRST, THEN PARSE
+        const text = await response.text();
+        console.log('Response text:', text); // Debug log
+        
+        let result;
+        try {
+            result = JSON.parse(text);
+        } catch (parseError) {
+            console.error('JSON parse error:', parseError);
+            console.error('Response was:', text);
+            alert('Server returned invalid JSON. Check console for details.');
+            return;
+        }
+        
+        if (result.success) {
+            localStorage.setItem('currentUser', JSON.stringify({
+                name: firstName + ' ' + lastName,
+                email: email,
+                customerId: result.customerId,
+                firstName: firstName,
+                lastName: lastName,
+                contactNumber: contactNumber
+            }));
+
+            
+            alert('Sign up successful! Welcome, ' + firstName);
+            window.location.href = 'index.html';
+        } else {
+            alert('Registration failed: ' + result.message);
+        }
+    } catch (error) {
+        console.error('Error:', error);
+        alert('An error occurred. Check the console for details.');
+    }
+}
+
+// --- 3. HANDLE LOGIN ---
+async function handleLogin(e) {
+    e.preventDefault();
+    
+    const email = document.getElementById('login-email').value;
+    const password = document.getElementById('login-password').value;
+    
+    try {
+        // ✅ FIX: Use absolute path from your project root
+        const apiUrl = window.location.origin + window.location.pathname.replace('Login.html', '') + 'api/auth/authentication.php?action=login';
+        
+        console.log('Attempting login to:', apiUrl); // Debug log
+        
+        const response = await fetch(apiUrl, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-Requested-With': 'XMLHttpRequest'
+            },
+            body: JSON.stringify({
+                email: email,
+                password: password
+            }),
+            credentials: 'include'
+        });
+        
+        console.log('Response status:', response.status); // Debug log
+        
+        // ✅ CHECK IF RESPONSE IS OK BEFORE PARSING JSON
+        if (!response.ok) {
+            const text = await response.text();
+            console.error('Server response:', text);
+            alert('Server error: ' + response.status + '\n' + text.substring(0, 200));
+            return;
+        }
+        
+        // ✅ TRY TO GET TEXT FIRST, THEN PARSE
+        const text = await response.text();
+        console.log('Response text:', text); // Debug log
+        
+        let result;
+        try {
+            result = JSON.parse(text);
+        } catch (parseError) {
+            console.error('JSON parse error:', parseError);
+            console.error('Response was:', text);
+            alert('Server returned invalid JSON. Check console for details.');
+            return;
+        }
+        
+        if (result.success) {
+            localStorage.setItem('currentUser', JSON.stringify({
+                name: result.customer.FirstName + ' ' + result.customer.LastName,
+                email: result.customer.Email,
+                customerId: result.customer.CustomerID,
+                firstName: result.customer.FirstName,
+                lastName: result.customer.LastName,
+                contactNumber: result.customer.ContactNumber
+            }));
+
+            
+            alert('Welcome back, ' + result.customer.FirstName);
+            window.location.href = 'index.html';
+        } else {
+            alert('Login failed: ' + result.message);
+        }
+    } catch (error) {
+        console.error('Error:', error);
+        alert('An error occurred. Check the console for details.');
+    }
+}
+
+    // --- 5. HANDLE LOGOUT ---
+    function performLogout() {
+        localStorage.removeItem('currentUser');
+        localStorage.removeItem('redirectAfterLogin');
+        alert("You have been successfully logged out.");
+        window.location.href = 'Login.html';
+    }
+
+    // --- 6. UPDATE HEADER LINK ---
+    function updateAccountLink() {
+        const accountLink = document.getElementById('account-link');
+        const user = JSON.parse(localStorage.getItem('currentUser'));
+
+        if (user && accountLink) {
+            accountLink.textContent = user.firstName.toUpperCase();
+            accountLink.href = '#'; 
+            
+            accountLink.onclick = (e) => {
+                e.preventDefault();
+                if (confirm(`Are you sure you want to log out, ${user.firstName}?`)) {
+                    performLogout();
+                }
+            };
+
+        } else if (accountLink) {
+            accountLink.textContent = 'PROFILE';
+            accountLink.href = 'Login.html';
+            accountLink.onclick = null;
+        }
+    }
+
+    // --- 7. INITIALIZATION ---
+    document.addEventListener('DOMContentLoaded', () => {
+        const currentUser = localStorage.getItem('currentUser');
+        updateAccountLink();
+
+        if (currentUser) {
+            const user = JSON.parse(currentUser);
+            
+            formContent.innerHTML = `
+                <h2 style="color: #BC1823;">Welcome Back, ${user.firstName}!</h2>
+                <p style="text-align: center; margin-top: 20px; font-size: 1.1em;">
+                    You are currently logged in as <strong>${user.email}</strong>.
+                </p>
+                <div style="text-align: center; margin-top: 30px;">
+                    <button id="main-logout-btn" style="padding: 12px 30px; background-color: #BC1823; color: white; border: none; border-radius: 4px; cursor: pointer; font-size: 1.2em; font-weight: bold; margin-bottom: 15px;">
+                        LOG OUT
+                    </button>
+                    <br>
+                    <a href="index.html" style="color: #444; text-decoration: underline;">Continue Browsing</a>
+                </div>
+            `;
+            
+            document.getElementById('main-logout-btn').addEventListener('click', () => {
+                if (confirm(`Are you sure you want to log out, ${user.firstName}?`)) {
+                    performLogout(); 
+                }
+            });
+
+        } else {
+            renderLoginForm();
+        }
+    });
+</script>
+</body>
+</html>

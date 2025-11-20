@@ -1,0 +1,294 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Profile - Tabeya</title>
+    <link rel="stylesheet" href="CSS/Profile.css"> 
+</head>
+<body>
+
+    <header>
+        <div class="logo">
+            <img src="Photo/Tabeya Name.png" alt="Tabeya Logo">
+        </div>
+        <nav>
+            <a href="index.html">HOME</a>
+            <a href="Menu.html">MENU</a> 
+            <a href="#" id="cater-reservation-link">CATER RESERVATION</a>
+            <a href="GALLERY.html">GALLERY</a>
+            <a href="Review.php">TESTIMONY</a>
+            <a href="About.html">ABOUT</a>
+            <a href="Profile.html" class="active" id="account-link">PROFILE</a> 
+            <div class="cart-icon" id="view-cart-btn">
+                🛒 <span class="cart-count" id="cart-item-count">0</span>
+            </div>
+        </nav>
+    </header>
+
+    <div class="profile-section">
+        <h2>My Profile</h2>
+        
+        <div id="profile-details-container">
+            <div class="detail-item"><strong>Name:</strong> <span id="profile-name"></span></div>
+            <div class="detail-item"><strong>Email:</strong> <span id="profile-email"></span></div>
+            <div class="detail-item"><strong>Contact:</strong> <span id="profile-contact"></span></div>
+            <div class="detail-item"><strong>Total Orders:</strong> <span id="profile-orders-count">0</span></div>
+            <div class="detail-item"><strong>Account Status:</strong> <span id="profile-status" style="color: green;">Active</span></div>
+        </div>
+        
+        <div class="profile-actions">
+            <button class="action-btn" onclick="window.location.href='OrderHistory.html'">View Order History</button>
+            <button class="action-btn" onclick="window.location.href='EditProfile.html'">Edit Profile</button>
+            <button class="logout-btn" id="logout-btn">Logout</button>
+        </div>
+    </div>
+
+    <div id="cart-modal" class="modal">
+        <div class="modal-content">
+            <span class="close-btn">&times;</span>
+            <h2>Your Cart</h2>
+            <div id="cart-items-list">
+            </div>
+            <div class="cart-summary">
+                <strong>Total: ₱<span id="cart-total">0.00</span></strong>
+            </div>
+            <button id="checkout-btn">Proceed to Checkout</button>
+        </div>
+    </div>
+    
+    <footer>
+        <div class="contact-section">
+            <div class="container">
+                <div class="contact-info">
+                    <h2>Contact Us</h2>
+                    <p>Have any questions? We'd love to hear from you.</p>
+                    <div class="info-group">
+                        <div class="info-item visit-us">
+                            <img src="Photo/VisitUs.png" alt="Location Icon" class="icon">
+                            <div>
+                                <strong>Visit us</strong>
+                                <p>Poblacion 2, Vinzons Avenue,<br>Vinzons, Camarines Norte</p>
+                            </div>
+                        </div>
+                        <div class="info-item call-us">
+                            <img src="Photo/Selpon.png" alt="Phone Icon" class="icon">
+                            <div>
+                                <strong>Call us</strong>
+                                <p>09380839641</p>
+                            </div>
+                        </div>
+                        <div class="info-item connect-us">
+                            <img src="Photo/Facebook.png" alt="Facebook Icon" class="icon">
+                            <div>
+                                <strong>Connect to us</strong>
+                                <a href="https://www.facebook.com/profile.php?id=100063540027038" target="_blank" class="no-underline">Tabeya, VCN</a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        const CART_KEY = 'tabeyaCart';
+        const USER_KEY = 'currentUser';
+        const LOGIN_PAGE = 'Login.html';
+        const CATER_RESERVATION_PAGE = 'CaterReservation.html';
+        const PROFILE_PAGE = 'Profile.html'; 
+        
+        let cart = JSON.parse(localStorage.getItem(CART_KEY)) || [];
+
+        // --- Core Login Check ---
+        function checkUserLoginStatus() {
+            return localStorage.getItem(USER_KEY) !== null;
+        }
+
+        function checkLoginAndProceed(redirectTarget) {
+            if (!checkUserLoginStatus()) { 
+                alert("You must log in to perform this action.");
+                if (redirectTarget) {
+                    localStorage.setItem('redirectAfterLogin', redirectTarget);
+                }
+                window.location.href = LOGIN_PAGE;
+                return false;
+            }
+            return true;
+        }
+
+        // --- Profile Logic ---
+        function renderProfileDetails(user) {
+            document.getElementById('profile-name').textContent = user.name || 'N/A';
+            document.getElementById('profile-email').textContent = user.email || 'N/A';
+            document.getElementById('profile-contact').textContent = user.contact || 'N/A';
+            
+            // Placeholder: Use stored orders count
+            const totalOrders = localStorage.getItem('userTotalOrders') || '0'; 
+            document.getElementById('profile-orders-count').textContent = totalOrders;
+        }
+
+        function checkAndLoadProfile() {
+            const user = JSON.parse(localStorage.getItem(USER_KEY));
+            
+            if (!user) {
+                // Redirect user if not logged in
+                alert("You need to log in to view your profile.");
+                window.location.href = LOGIN_PAGE;
+            } else {
+                renderProfileDetails(user);
+            }
+        }
+        
+        // --- FIXED Logout Function ---
+        function logoutUser() {
+            // Remove all user-related data
+            localStorage.removeItem(USER_KEY); 
+            localStorage.removeItem('userTotalOrders'); 
+            localStorage.removeItem(CART_KEY); // Clear cart
+
+            alert("You have been logged out.");
+            window.location.href = LOGIN_PAGE; // Redirect
+        }
+
+        // --- Cart Display Logic ---
+        function updateCartDisplay() {
+            const count = cart.reduce((sum, item) => sum + item.quantity, 0);
+            document.getElementById('cart-item-count').textContent = count;
+        }
+
+        function saveCart() {
+            localStorage.setItem(CART_KEY, JSON.stringify(cart));
+            updateCartDisplay();
+            renderCartModal();
+        }
+        
+        function updateCartItemQuantity(itemId, change) {
+            const itemIndex = cart.findIndex(item => item.id === itemId);
+            if (itemIndex > -1) {
+                cart[itemIndex].quantity += change;
+                if (cart[itemIndex].quantity <= 0) {
+                    cart.splice(itemIndex, 1);
+                }
+            }
+            saveCart();
+        }
+        
+        function calculateTotal() {
+            return cart.reduce((total, item) => total + (item.price * item.quantity), 0).toFixed(2);
+        }
+
+        function renderCartModal() {
+            const listContainer = document.getElementById('cart-items-list');
+            const totalElement = document.getElementById('cart-total');
+            const checkoutBtn = document.getElementById('checkout-btn');
+            let itemsHtml = '';
+
+            if (cart.length === 0) {
+                itemsHtml = '<p style="text-align: center; color: #777; padding: 20px 0;">Your cart is empty.</p>';
+                checkoutBtn.disabled = true;
+            } else {
+                cart.forEach(item => {
+                    const itemTotal = (item.price * item.quantity).toFixed(2);
+                    itemsHtml += `
+                        <div class="cart-item">
+                            <div class="item-info">
+                                <strong>${item.name}</strong>
+                                <p>₱${item.price.toFixed(2)} ea.</p>
+                            </div>
+                            <div class="item-controls">
+                                <div class="quantity-control">
+                                    <button class="qty-minus" data-id="${item.id}">-</button>
+                                    <span style="margin: 0 10px;">${item.quantity}</span>
+                                    <button class="qty-plus" data-id="${item.id}">+</button>
+                                </div>
+                                <span class="item-price-cart">₱${itemTotal}</span>
+                            </div>
+                        </div>
+                    `;
+                });
+                checkoutBtn.disabled = false;
+            }
+            
+            listContainer.innerHTML = itemsHtml;
+            totalElement.textContent = calculateTotal();
+            setupCartModalListeners();
+        }
+
+        // --- Global Listeners ---
+        function setupCartModalListeners() {
+            const modal = document.getElementById('cart-modal');
+            
+            modal.querySelectorAll('.qty-minus').forEach(button => {
+                button.addEventListener('click', (e) => {
+                    updateCartItemQuantity(e.target.getAttribute('data-id'), -1);
+                });
+            });
+
+            modal.querySelectorAll('.qty-plus').forEach(button => {
+                button.addEventListener('click', (e) => {
+                    updateCartItemQuantity(e.target.getAttribute('data-id'), 1);
+                });
+            });
+            
+            document.getElementById('checkout-btn').addEventListener('click', () => {
+                if (checkLoginAndProceed('Checkout.html')) {
+                    window.location.href = 'Checkout.html';
+                }
+            });
+        }
+        
+        function updateAccountLink() {
+            const accountLink = document.getElementById('account-link');
+            const user = JSON.parse(localStorage.getItem(USER_KEY));
+            
+            if (user) {
+                accountLink.textContent = user.name.split(' ')[0].toUpperCase();
+                accountLink.href = PROFILE_PAGE; 
+                accountLink.classList.add('active'); 
+            } else {
+                accountLink.textContent = 'PROFILE';
+                accountLink.href = LOGIN_PAGE;
+                accountLink.classList.add('active');
+            }
+        }
+        
+        function setupGlobalListeners() {
+            const modal = document.getElementById('cart-modal');
+            const btn = document.getElementById("view-cart-btn");
+            const span = document.getElementsByClassName("close-btn")[0];
+
+            btn.onclick = function() {
+                renderCartModal();
+                modal.style.display = "block";
+            }
+
+            span.onclick = function() {
+                modal.style.display = "none";
+            }
+
+            window.onclick = function(event) {
+                if (event.target == modal) {
+                    modal.style.display = "none";
+                }
+            }
+            
+            document.getElementById('cater-reservation-link').addEventListener('click', (e) => {
+                e.preventDefault();
+                checkLoginAndProceed(CATER_RESERVATION_PAGE);
+            });
+
+            // *** Logout Button Listener ***
+            document.getElementById('logout-btn').addEventListener('click', logoutUser);
+        }
+
+        // --- Initialization ---
+        document.addEventListener('DOMContentLoaded', () => {
+            checkAndLoadProfile(); 
+            updateCartDisplay();
+            updateAccountLink();
+            setupGlobalListeners();
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,519 @@
+/* =========================================== */
+/* === GLOBAL & LAYOUT STYLES (REQUIRED FOR PROFILE) === */
+/* =========================================== */
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+html, body {
+    height: 100%;
+}
+
+body {
+    /* Background settings from Home/Menu CSS */
+    background-image: url('../Photo/Background.jpg');
+    background-size: cover;
+    background-position: center;
+    background-attachment: fixed;
+    font-family: Arial, sans-serif;
+    display: flex;
+    flex-direction: column;
+    padding-top: 60px; /* Space for the fixed header */
+    min-height: 100vh; 
+}
+
+
+/* =========================================== */
+/* === HEADER/NAVIGATION STYLES === */
+/* =========================================== */
+
+header {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    background-color: rgba(188, 24, 35, 0.8); 
+    color: white;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1rem 2rem;
+    z-index: 100;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2);
+}
+
+header .logo img {
+    max-width: 120px;
+    height: auto;
+}
+
+nav {
+    display: flex;
+    align-items: center; 
+    gap: 20px;
+}
+
+nav a {
+    color: white;
+    font-weight: bold;
+    text-decoration: none;
+    transition: color 0.2s;
+}
+
+nav a:hover, nav a.active {
+    color: yellow; 
+}
+
+/* Cart Icon Styles */
+.cart-icon {
+    font-size: 1.5em;
+    cursor: pointer;
+    margin-left: 20px;
+    position: relative;
+    color: white; 
+}
+
+.cart-count {
+    position: absolute;
+    top: -10px;
+    right: -10px;
+    background-color: yellow; 
+    color: #BC1823; 
+    border-radius: 50%;
+    padding: 2px 6px;
+    font-size: 0.7em;
+    font-weight: bold;
+    line-height: 1; 
+}
+
+/* =========================================== */
+/* === PROFILE PAGE STYLES (MAIN CONTENT) === */
+/* =========================================== */
+
+/* Profile Section Container */
+.profile-section {
+    background-color: rgba(255, 255, 255, 0.95); 
+    color: #333; 
+    
+    padding: 30px;
+    margin: 50px auto 100px auto; 
+    border-radius: 12px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.4); 
+    
+    width: 90%;
+    max-width: 650px; 
+    box-sizing: border-box;
+    z-index: 5; 
+    flex-grow: 1; /* Pushes the footer to the bottom */
+}
+
+/* Heading Style */
+.profile-section h2 {
+    text-align: center;
+    color: #BC1823; 
+    margin-bottom: 25px;
+    font-size: 2.5em;
+    font-family: 'Arial Black', sans-serif; 
+    border-bottom: 3px solid #BC1823; 
+    padding-bottom: 10px;
+}
+
+/* Profile Details Container */
+#profile-details-container {
+    padding: 15px 25px;
+    border: 1px solid #BC1823; 
+    border-radius: 8px;
+    margin-bottom: 30px;
+    background-color: #fafafa; 
+}
+
+.detail-item {
+    display: flex;
+    justify-content: space-between;
+    padding: 12px 0;
+    border-bottom: 1px dashed #BC1823; 
+    font-size: 1.1em;
+}
+
+.detail-item:last-child {
+    border-bottom: none; 
+}
+
+.detail-item strong {
+    color: #BC1823; 
+    font-weight: bold;
+}
+
+.detail-item span {
+    color: #444;
+    text-align: right;
+    font-weight: 500;
+}
+
+/* Total Orders Count (Styled like the yellow item price in menu) */
+.detail-item:nth-child(4) span {
+    color: yellow; 
+    background-color: #BC1823; 
+    padding: 2px 6px;
+    border-radius: 4px;
+    font-weight: bold;
+}
+
+/* Account Status (Active) */
+.detail-item span[style*="color: green"] {
+    font-weight: bold;
+    color: #008000 !important; 
+}
+
+/* Action Buttons */
+.profile-actions {
+    display: flex;
+    flex-wrap: wrap; 
+    gap: 10px; 
+    justify-content: center;
+}
+
+.profile-actions button {
+    padding: 12px 18px;
+    border: none;
+    border-radius: 6px;
+    font-size: 1em;
+    cursor: pointer;
+    transition: background-color 0.3s, transform 0.1s;
+    font-weight: bold;
+    text-transform: uppercase;
+    flex-grow: 1; 
+    max-width: 100%; 
+    min-width: 150px;
+}
+
+/* Logout Button (Primary Red) */
+.logout-btn {
+    background-color: #BC1823; 
+    color: white;
+}
+
+.logout-btn:hover {
+    background-color: #a0141d;
+    transform: translateY(-2px);
+}
+
+/* General Action Buttons (Green/Checkout Color) */
+.action-btn {
+    background-color: #008000; 
+    color: white;
+}
+
+.action-btn:hover {
+    background-color: #006400;
+    transform: translateY(-2px);
+}
+
+/* =========================================== */
+/* === CART MODAL STYLES (FIXED POSITIONING) === */
+/* =========================================== */
+
+/* 1. Modal Container (The full screen overlay) */
+.modal {
+    position: fixed;
+    z-index: 200; /* Dapat mas mataas sa header */
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.6); 
+    display: none; 
+    overflow: auto; 
+}
+
+/* 2. Modal Content (The white box inside the overlay) */
+.modal-content {
+    background-color: #fefefe;
+    margin: 10% auto; 
+    padding: 30px;
+    border: 1px solid #888;
+    width: 90%; 
+    max-width: 500px; 
+    border-radius: 10px;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.5);
+    position: relative;
+    animation-name: animatetop;
+    animation-duration: 0.4s
+}
+
+@keyframes animatetop {
+    from {top: -300px; opacity: 0}
+    to {top: 0; opacity: 1}
+}
+
+/* 3. Close Button (X) */
+.close-btn {
+    color: #BC1823;
+    float: right;
+    font-size: 28px;
+    font-weight: bold;
+    cursor: pointer;
+}
+
+.close-btn:hover,
+.close-btn:focus {
+    color: #a0141d;
+    text-decoration: none;
+    cursor: pointer;
+}
+
+/* 4. Cart Item Styling */
+.cart-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px 0;
+    border-bottom: 1px dashed #ddd;
+}
+
+.cart-item:last-child {
+    border-bottom: none;
+}
+
+.item-controls {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+}
+
+.quantity-control button {
+    background-color: #BC1823;
+    color: white;
+    border: none;
+    padding: 5px 10px;
+    cursor: pointer;
+    border-radius: 4px;
+    font-weight: bold;
+}
+
+.cart-summary {
+    text-align: right;
+    margin-top: 20px;
+    font-size: 1.2em;
+    color: #BC1823;
+}
+
+#checkout-btn {
+    width: 100%;
+    padding: 12px;
+    margin-top: 15px;
+    background-color: #008000;
+    color: white;
+    border: none;
+    border-radius: 6px;
+    font-size: 1.1em;
+    cursor: pointer;
+    transition: background-color 0.3s;
+}
+
+#checkout-btn:hover:not(:disabled) {
+    background-color: #006400;
+}
+
+#checkout-btn:disabled {
+    background-color: #ccc;
+    cursor: not-allowed;
+}
+
+
+/* =========================================== */
+/* === FOOTER STYLING === */
+/* =========================================== */
+
+footer {
+    width: 100%;
+    flex-shrink: 0; 
+}
+
+.contact-section {
+    background-color: rgba(188, 24, 35, 0.9);
+    padding: 5px; 
+    height: auto; 
+    width: 100%;
+}
+
+.container {
+    max-width: 1200px;
+    margin: 0 auto;
+    display: flex;
+    justify-content: center;
+    flex-wrap: wrap;
+}
+
+.contact-info {
+    max-width: 100%;
+    text-align: center;
+    color: yellow;
+}
+
+.contact-info h2 {
+    font-size: 1.5em;
+    color: yellow;
+}
+
+.contact-info p {
+    font-size: 1em;
+    color: rgb(255, 255, 255);
+}
+
+.info-group {
+    display: flex;
+    justify-content: space-between; 
+    align-items: flex-start; 
+    flex-wrap: nowrap; 
+    gap: 1px; 
+}
+
+.info-item.visit-us {
+    margin-right: 130px; 
+}
+
+.info-item.connect-us {
+    margin-left: 130px; 
+}
+
+.info-item {
+    display: flex;
+    align-items: center;
+    margin-top: 1px;
+    margin-bottom: 1px;
+    text-align: left;
+}
+
+.icon {
+    width: 40px;
+    height: 40px;
+    margin-right: 10px;
+    /* This filter is used to turn white/black icons into white/yellow for contrast */
+    filter: invert(100%) sepia(100%) saturate(0%) hue-rotate(287deg) brightness(108%) contrast(100%); 
+}
+
+.no-underline {
+    color: white;
+    text-decoration: none;
+}
+
+.no-underline:hover {
+    text-decoration: underline;
+    color: yellow;
+}
+
+/* =========================================== */
+/* === MEDIA QUERIES (Responsive Design) === */
+/* =========================================== */
+
+/* Tablet Styles (768px - 1024px) */
+@media (max-width: 1024px) {
+    /* Navigation Adjustments */
+    header {
+        flex-direction: column;
+        padding: 1rem;
+    }
+
+    header .logo img {
+        max-width: 100px;
+        margin-bottom: 1rem;
+    }
+
+    nav {
+        flex-wrap: wrap;
+        justify-content: center;
+        gap: 15px;
+        width: 100%;
+    }
+
+    /* Footer - Stacking items */
+    .info-group {
+        flex-direction: column;
+        align-items: center;
+    }
+
+    .info-item.visit-us,
+    .info-item.connect-us,
+    .info-item.call-us {
+        margin: 10px 0; 
+    }
+
+    .info-item {
+        justify-content: center;
+        text-align: center;
+        min-width: 90%;
+    }
+
+    /* Profile actions adjustment */
+    .profile-actions {
+        flex-wrap: wrap; 
+    }
+}
+
+/* Mobile Styles (up to 767px) */
+@media (max-width: 767px) {
+    body {
+        /* Set body padding-top to 0 if header becomes static on mobile */
+        padding-top: 0;
+    }
+
+    header {
+        position: static; 
+        flex-direction: column;
+        padding: 10px;
+    }
+
+    .profile-section {
+        padding: 20px;
+        margin: 20px auto;
+    }
+
+    .profile-section h2 {
+        font-size: 2em;
+    }
+    
+    .detail-item {
+        flex-direction: column; 
+        align-items: flex-start;
+        padding: 8px 0;
+    }
+
+    .detail-item strong {
+        margin-bottom: 5px;
+    }
+
+    .detail-item span {
+        text-align: left;
+        margin-top: 0;
+        width: 100%;
+    }
+
+    .profile-actions button {
+        width: 100%; 
+        min-width: auto;
+    }
+
+    /* Footer - Stack icon and text for very small screens */
+    .info-group {
+        flex-direction: column;
+    }
+    
+    .info-item {
+        flex-direction: column; 
+        align-items: center;
+        margin-bottom: 15px;
+    }
+    
+    .icon {
+        margin: 0 0 5px 0;
+    }
+
+    /* Modal Content on small screens */
+    .modal-content {
+        margin: 5% auto;
+    }
+}

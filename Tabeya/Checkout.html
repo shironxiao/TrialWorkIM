@@ -1,0 +1,408 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Checkout - Tabeya</title>
+    <link rel="stylesheet" href="CSS/Menu.css"> 
+    <style>
+        /* Specific CSS for Checkout Page */
+        .checkout-container {
+            padding: 150px 20px 50px;
+            max-width: 1000px;
+            margin: 0 auto;
+            min-height: 80vh;
+            display: flex;
+            gap: 30px;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+
+        .checkout-section {
+            background-color: rgba(255, 255, 255, 0.9);
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+        }
+
+        /* Left side: Order Details & Total */
+        .order-summary-section {
+            flex: 1;
+            min-width: 300px;
+            max-width: 450px;
+        }
+
+        .order-summary-section h2, .details-section h2 {
+            color: #BC1823;
+            border-bottom: 2px solid #BC1823;
+            padding-bottom: 10px;
+            margin-bottom: 20px;
+        }
+
+        #cart-items-display {
+            max-height: 350px;
+            overflow-y: auto;
+            margin-bottom: 15px;
+            padding-right: 10px; /* Space for scrollbar */
+        }
+
+        .checkout-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px 0;
+            border-bottom: 1px dashed #ddd;
+            font-size: 0.95em;
+        }
+        
+        .checkout-item:last-child {
+            border-bottom: none;
+        }
+
+        .item-details-co {
+            flex-grow: 1;
+        }
+
+        .item-details-co span {
+            display: block;
+        }
+
+        .item-name-co {
+            font-weight: bold;
+            color: #333;
+        }
+
+        .item-qty-price-co {
+            color: #666;
+            font-size: 0.9em;
+        }
+        
+        .item-subtotal-co {
+            font-weight: bold;
+            color: #008000; /* Green for total price */
+        }
+        
+        .summary-total {
+            text-align: right;
+            margin-top: 15px;
+            padding-top: 15px;
+            border-top: 2px solid #BC1823;
+            font-size: 1.5em;
+            color: #BC1823;
+        }
+        
+        /* Right side: Customer & Order Details Form */
+        .details-section {
+            flex: 1;
+            min-width: 300px;
+            max-width: 450px;
+        }
+        
+        .form-group {
+            margin-bottom: 15px;
+        }
+
+        .form-group label {
+            display: block;
+            font-weight: bold;
+            margin-bottom: 5px;
+            color: #333;
+        }
+
+        .form-group input, .form-group select, .form-group textarea {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            box-sizing: border-box;
+            font-size: 1em;
+        }
+        
+        .full-width-btn {
+            width: 100%;
+            padding: 15px;
+            background-color: #008000; /* Green for submission */
+            color: white;
+            border: none;
+            border-radius: 5px;
+            font-size: 1.2em;
+            font-weight: bold;
+            cursor: pointer;
+            transition: background-color 0.3s;
+            margin-top: 20px;
+        }
+
+        .full-width-btn:hover {
+            background-color: #006400;
+        }
+
+        /* Media Queries for Responsiveness */
+        @media (max-width: 768px) {
+            .checkout-container {
+                flex-direction: column;
+                padding-top: 100px;
+            }
+
+            .order-summary-section, .details-section {
+                max-width: 100%;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <header>
+        <div class="logo">
+            <img src="Photo/Tabeya Name.png" alt="Tabeya Logo">
+        </div>
+        <nav>
+            <a href="index.html">HOME</a>
+            <a href="Menu.html">MENU</a>
+            <a href="#" id="cater-reservation-link">CATER RESERVATION</a>
+            <a href="GALLERY.html">GALLERY</a>
+            <a href="Review.php">TESTIMONY</a>
+            <a href="About.html">ABOUT</a>
+            <a href="Login.html" id="account-link">PROFILE</a> 
+            <div class="cart-icon" id="view-cart-btn">
+                🛒 <span class="cart-count" id="cart-item-count">0</span>
+            </div>
+        </nav>
+    </header>
+
+    <div class="checkout-container">
+        <div class="checkout-section order-summary-section">
+            <h2>Order Summary</h2>
+            <div id="cart-items-display">
+                </div>
+            <div class="summary-total">
+                Total: ₱<span id="order-grand-total">0.00</span>
+            </div>
+        </div>
+
+        <div class="checkout-section details-section">
+            <h2>Order Details</h2>
+            <form id="checkout-form" action="process_order.php" method="POST">
+                
+                <input type="hidden" name="cart_data" id="cart_data_input">
+                <input type="hidden" name="total_amount" id="total_amount_input">
+                <input type="hidden" name="customer_id" id="customer_id_input">
+
+                <div class="form-group">
+                    <label for="name">Name:</label>
+                    <input type="text" id="name" name="name" required readonly>
+                </div>
+                <div class="form-group">
+                    <label for="contact">Contact Number:</label>
+                    <input type="text" id="contact" name="contact" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="order_type">Order Type:</label>
+                    <select id="order_type" name="order_type" required>
+                        <option value="DELIVERY">Delivery</option>
+                        <option value="PICKUP">Pickup</option>
+                    </select>
+                </div>
+
+                <div class="form-group" id="delivery-address-group">
+                    <label for="address">Delivery Address:</label>
+                    <textarea id="address" name="address" rows="3" required></textarea>
+                </div>
+                
+                <div class="form-group">
+                    <label for="payment_method">Payment Method:</label>
+                    <select id="payment_method" name="payment_method" required>
+                        <option value="COD">Cash On Delivery (COD)</option>
+                        <option value="GCASH">GCash</option>
+                        <option value="PAYMAYA">PayMaya</option>
+                    </select>
+                </div>
+
+                <button type="submit" class="full-width-btn">Place Order</button>
+            </form>
+        </div>
+    </div>
+    
+    <footer>
+        <div class="contact-section">
+            <div class="container">
+                <div class="contact-info">
+                    <h2>Contact Us</h2>
+                    <p>Have any questions? We'd love to hear from you.</p>
+                    <div class="info-group">
+                        <div class="info-item visit-us">
+                            <img src="Photo/VisitUs.png" alt="Location Icon" class="icon">
+                            <div>
+                                <strong>Visit us</strong>
+                                <p>Poblacion 2, Vinzons Avenue,<br>Vinzons, Camarines Norte</p>
+                            </div>
+                        </div>
+                        <div class="info-item call-us">
+                            <img src="Photo/Selpon.png" alt="Phone Icon" class="icon">
+                            <div>
+                                <strong>Call us</strong>
+                                <p>09380839641</p>
+                            </div>
+                        </div>
+                        <div class="info-item connect-us">
+                            <img src="Photo/Facebook.png" alt="Facebook Icon" class="icon">
+                            <div>
+                                <strong>Connect to us</strong>
+                                <a href="https://www.facebook.com/profile.php?id=100063540027038" target="_blank" class="no-underline">Tabeya, VCN</a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        // ====================================================================
+        // === CONFIGURATION & DATA ===
+        // ====================================================================
+        const CART_KEY = 'tabeyaCart';
+        const USER_KEY = 'currentUser';
+        const LOGIN_PAGE = 'Login.html';
+        const CATER_RESERVATION_PAGE = 'CaterReservation.html';
+
+        let cart = JSON.parse(localStorage.getItem(CART_KEY)) || [];
+        let currentUser = JSON.parse(localStorage.getItem(USER_KEY));
+
+        // Redirect if cart is empty or user is not logged in (redundant check)
+        if (cart.length === 0) {
+            alert("Your cart is empty. Redirecting to Menu.");
+            window.location.href = 'Menu.html';
+        }
+        if (!currentUser) {
+            alert("You must log in to proceed to checkout.");
+            localStorage.setItem('redirectAfterLogin', 'Checkout.html');
+            window.location.href = LOGIN_PAGE;
+        }
+        
+        // ====================================================================
+        // === HELPER FUNCTIONS ===
+        // ====================================================================
+        function calculateTotal() {
+            return cart.reduce((total, item) => total + (item.price * item.quantity), 0);
+        }
+
+        // ====================================================================
+        // === RENDERING & INITIALIZATION ===
+        // ====================================================================
+        function renderOrderSummary() {
+            const display = document.getElementById('cart-items-display');
+            let itemsHtml = '';
+            let grandTotal = 0;
+
+            cart.forEach(item => {
+                const subtotal = item.price * item.quantity;
+                grandTotal += subtotal;
+                
+                itemsHtml += `
+                    <div class="checkout-item">
+                        <div class="item-details-co">
+                            <span class="item-name-co">${item.name}</span>
+                            <span class="item-qty-price-co">${item.quantity} x ₱${item.price.toFixed(2)}</span>
+                        </div>
+                        <span class="item-subtotal-co">₱${subtotal.toFixed(2)}</span>
+                    </div>
+                `;
+            });
+
+            display.innerHTML = itemsHtml;
+            document.getElementById('order-grand-total').textContent = grandTotal.toFixed(2);
+            
+            // Populate hidden inputs for form submission
+            document.getElementById('cart_data_input').value = JSON.stringify(cart);
+            document.getElementById('total_amount_input').value = grandTotal.toFixed(2);
+        }
+
+        function populateUserDetails() {
+            if (currentUser) {
+                // *** THE FINAL FIX: Using 'customerId' (lowercase d) matching Login.html ***
+                document.getElementById('customer_id_input').value = currentUser.customerId || ''; 
+                
+                document.getElementById('name').value = `${currentUser.name}`; 
+                // Note: Assuming contact number is stored as 'contactNumber' in Login.html (if not, adjust to 'contactNumber')
+                document.getElementById('contact').value = currentUser.contactNumber || currentUser.contact || ''; 
+                // Address is not automatically pre-filled from Login.html in this version, user must input or it comes from PHP session/cookie
+            }
+        }
+        
+        function setupOrderTypeListener() {
+            const orderTypeSelect = document.getElementById('order_type');
+            const addressGroup = document.getElementById('delivery-address-group');
+            const addressTextarea = document.getElementById('address');
+            
+            orderTypeSelect.addEventListener('change', (e) => {
+                if (e.target.value === 'PICKUP') {
+                    // Hide address for pickup
+                    addressGroup.style.display = 'none';
+                    addressTextarea.removeAttribute('required');
+                } else {
+                    // Show address for delivery
+                    addressGroup.style.display = 'block';
+                    addressTextarea.setAttribute('required', 'required');
+                }
+            });
+            
+            // Initialize visibility based on default selection
+            orderTypeSelect.dispatchEvent(new Event('change'));
+        }
+
+        function updateCartLink() {
+             const count = cart.reduce((sum, item) => sum + item.quantity, 0);
+             document.getElementById('cart-item-count').textContent = count;
+             
+             // Update account link
+             const accountLink = document.getElementById('account-link');
+             if (currentUser) {
+                 accountLink.textContent = currentUser.name.split(' ')[0].toUpperCase();
+                 accountLink.href = 'Profile.html';
+             } else {
+                 accountLink.textContent = 'PROFILE';
+                 accountLink.href = 'Login.html';
+             }
+         }
+         
+        function setupGlobalListeners() {
+            // Placeholder for viewing cart from header (no modal needed on checkout, but keeps icon function)
+            document.getElementById('view-cart-btn').addEventListener('click', () => {
+                // Redirect back to menu or show alert
+                alert("Please modify your cart on the Menu page.");
+                window.location.href = 'Menu.html'; 
+            });
+            
+            // Cater Reservation link (requires login check - simplified logic here)
+            document.getElementById('cater-reservation-link').addEventListener('click', (e) => {
+                e.preventDefault();
+                if (currentUser) {
+                    window.location.href = CATER_RESERVATION_PAGE;
+                } else {
+                    alert("You must log in to access Cater Reservation.");
+                    localStorage.setItem('redirectAfterLogin', CATER_RESERVATION_PAGE);
+                    window.location.href = LOGIN_PAGE;
+                }
+            });
+            
+            // Handle form submission (Optional: Add front-end validation if needed)
+            document.getElementById('checkout-form').addEventListener('submit', (e) => {
+                // The form submits to process_order.php
+            });
+        }
+
+
+        // ====================================================================
+        // === START UP ===
+        // ====================================================================
+        document.addEventListener('DOMContentLoaded', () => {
+            updateCartLink();
+            renderOrderSummary();
+            populateUserDetails();
+            setupOrderTypeListener();
+            setupGlobalListeners();
+        });
+    </script>
+</body>
+</html>
