@@ -5,57 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Reservation Information</title>
     <link rel="stylesheet" href="CSS/userInfoDesign.css">
-    <style>
-        .product-category-nav {
-            background-color: rgb(188, 24, 35); 
-            position: fixed; 
-            top: 0;
-            left: 0; 
-            right: 0;
-            display: flex; 
-            justify-content: center; 
-            padding: 15px;
-            z-index: 50;
-            flex-wrap: wrap;
-            gap: 5px;
-        }
-        .product-category-nav a {
-            color: white;
-            margin: 0 10px;
-            text-decoration: none;
-            font-weight: bold;
-            cursor: pointer;
-            padding: 5px 10px;
-        }
-        .product-category-nav a:hover,
-        .product-category-nav a.active {
-            color: yellow;
-        }
-        .loading-spinner {
-            text-align: center;
-            padding: 40px;
-            color: #666;
-        }
-        .loading-spinner::after {
-            content: "";
-            display: inline-block;
-            width: 30px;
-            height: 30px;
-            border: 4px solid rgba(0, 0, 0, 0.1);
-            border-radius: 50%;
-            border-top-color: #bc1823;
-            animation: spin 0.8s linear infinite;
-        }
-        @keyframes spin {
-            to { transform: rotate(360deg); }
-        }
-        .no-products {
-            text-align: center;
-            color: #666;
-            padding: 40px;
-            font-style: italic;
-        }
-    </style>
+   
 </head>
 <body>
     <div class="background">
@@ -66,62 +16,61 @@
             <div class="continue-section">
                 <button class="continue-btn" onclick="initializeProductSelection()">Continue to Product Selection</button>
             </div>
-            <div id="product-selection-panel" class="product-selection-panel">
-                <div class="product-category-nav">
-                    <a href="#" data-category="PLATTER" class="active">Platter</a>
-                    <a href="#" data-category="RICE MEAL">Rice Meal</a>
-                    <a href="#" data-category="RICE">Rice</a>
-                    <a href="#" data-category="NOODLES & PASTA">Bilao</a>
-                    <a href="#" data-category="SPAGHETTI MEAL">Spaghetti Meals</a>
-                    <a href="#" data-category="SNACKS">Snacks</a>
-                    <a href="#" data-category="DESSERT">Dessert</a>
-                    <a href="#" data-category="DRINKS & BEVERAGES">Drinks & Beverages</a>
-                </div>
-                <div id="product-groups" class="product-groups"></div>
-                <div class="panel-controls">
-                    <div class="total-price-container">
-                        Total Price: ₱<span id="total-price">0.00</span>
-                    </div>
-                    <div>
-                        <button class="cancel-btn" onclick="closeProductSelection()">Cancel</button>
-                        <button class="submit-btn" onclick="showConfirmationPopup()">Submit Orders</button>
-                    </div>
-                </div>
-            </div>
         </div>
     </div>  
 
-    <div class="popup-overlay" id="confirmation-popup">
-        <div class="popup-content">
-            <p>Are you sure you want to submit your orders?<br>
-            Total Orders: ₱<span id="total-reservation"></span></p>
-            <button onclick="confirmReservation()">Yes</button>
-            <button onclick="closePopup('confirmation-popup')">No</button>
+    <!-- Product Selection Panel -->
+    <div id="product-selection-panel">
+        <div class="product-category-nav">
+            <a href="#" data-category="PLATTER" class="active">Platter</a>
+            <a href="#" data-category="RICE MEAL">Rice Meal</a>
+            <a href="#" data-category="RICE">Rice</a>
+            <a href="#" data-category="NOODLES & PASTA">Bilao</a>
+            <a href="#" data-category="SPAGHETTI MEAL">Spaghetti Meals</a>
+            <a href="#" data-category="SNACKS">Snacks</a>
+            <a href="#" data-category="DESSERT">Dessert</a>
+            <a href="#" data-category="DRINKS & BEVERAGES">Drinks</a>
+        </div>
+        <div id="product-groups"></div>
+        <div class="panel-controls">
+            <div class="total-price-container">
+                Total: ₱<span id="total-price">0.00</span>
+            </div>
+            <div class="btn-group">
+                <button class="cancel-btn" onclick="closeProductSelection()">Cancel</button>
+                <button class="submit-btn" onclick="showConfirmationPopup()">Confirm Order</button>
+            </div>
         </div>
     </div>
 
+    <!-- Confirmation Popup -->
+    <div class="popup-overlay" id="confirmation-popup">
+        <div class="popup-content">
+            <p>Confirm your order?<br><br><strong style="font-size:24px;color:#bc1823;">₱<span id="total-reservation"></span></strong></p>
+            <button onclick="confirmReservation()">Yes, Submit</button>
+            <button onclick="closePopup('confirmation-popup')">Cancel</button>
+        </div>
+    </div>
+
+    <!-- Success Popup -->
     <div class="popup-overlay" id="success-popup">
         <div class="popup-content">
-            <p>Orders received! Our staff will contact you shortly to get your delivery address. Thank you for choosing TABEYA!</p>
-            <button onclick="redirectToReservation()">Exit to Cater Reservation</button>
+            <p style="font-size:40px;margin-bottom:10px;">✅</p>
+            <p><strong>Order Received!</strong><br><br>Our staff will contact you shortly for delivery details.<br><br>Thank you for choosing <strong style="color:#bc1823;">TABEYA!</strong></p>
+            <button onclick="redirectToReservation()">Done</button>
         </div>
     </div>
 
     <script>
-    // ====================================================================
-    // GLOBAL VARIABLES
-    // ====================================================================
     let allProducts = [];
     let selectedProducts = {};
     let totalAmount = 0;
 
-    // ====================================================================
-    // INITIALIZE PRODUCT SELECTION
-    // ====================================================================
     async function initializeProductSelection() {
         try {
             const productGroups = document.getElementById('product-groups');
             productGroups.innerHTML = '<div class="loading-spinner"></div>';
+            document.getElementById('product-selection-panel').style.display = 'flex';
 
             const response = await fetch('fetch_products.php');
             if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
@@ -130,125 +79,108 @@
             if (!data.success) throw new Error(data.message || 'Failed to fetch products');
 
             allProducts = data.products || [];
-            console.log('Products loaded:', allProducts.length);
-            console.log('Categories found:', [...new Set(allProducts.map(p => p.Category))]);
+            console.log('Loaded', allProducts.length, 'products');
 
-            document.body.classList.add('blur-background');
-            document.getElementById('product-selection-panel').style.display = 'block';
-
-            // Display default category (PLATTER)
-            const defaultProducts = filterProductsByCategory('PLATTER');
-            displayProducts(defaultProducts);
+            displayProducts(filterProductsByCategory('PLATTER'));
             setupCategoryNavigation();
 
         } catch (error) {
-            console.error('Error initializing products:', error);
-            alert('Failed to load products. Please try again.\n' + error.message);
+            console.error('Error:', error);
+            alert('Failed to load products: ' + error.message);
+            closeProductSelection();
         }
     }
 
-    // ====================================================================
-    // FILTER PRODUCTS BY CATEGORY (Using actual Category field)
-    // ====================================================================
     function filterProductsByCategory(categoryName) {
-        return allProducts.filter(product => {
-            // Match the Category field from database
-            return product.Category && product.Category.toUpperCase() === categoryName.toUpperCase();
-        });
+        return allProducts.filter(p => p.Category && p.Category.toUpperCase() === categoryName.toUpperCase());
     }
 
-    // ====================================================================
-    // DISPLAY PRODUCTS
-    // ====================================================================
     function displayProducts(products) {
-        const productGroups = document.getElementById('product-groups');
-        productGroups.innerHTML = '';
+        const container = document.getElementById('product-groups');
+        container.innerHTML = '';
 
         if (products.length === 0) {
-            productGroups.innerHTML = '<p class="no-products">No products available in this category.</p>';
+            container.innerHTML = '<p class="no-products">No products in this category.</p>';
             return;
         }
 
         products.forEach(product => {
-            const productDiv = document.createElement('div');
-            productDiv.classList.add('product-item');
-
-            const savedQuantity = selectedProducts[product.ProductID]?.quantity || 0;
+            const qty = selectedProducts[product.ProductID]?.quantity || 0;
             const price = parseFloat(product.Price);
+            const img = product.Image || '';
+            const name = product.ProductName || 'Product';
+            const desc = product.Description || 'Delicious dish from Tabeya';
 
-            productDiv.innerHTML = `
-                <div class="product-details">
-                    <h3>${product.ProductName}</h3>
-                    <p>${product.Description || ''}</p>
-                    <p>Price: ₱${price.toFixed(2)}</p>
+            const card = document.createElement('div');
+            card.className = 'product-card';
+
+            card.innerHTML = `
+                <div class="product-image">
+                    ${img ? `<img src="${img}" alt="${name}" onerror="this.style.display='none';this.nextElementSibling.style.display='block'"><span class="placeholder-icon" style="display:none">🍽️</span>` : '<span class="placeholder-icon">🍽️</span>'}
                 </div>
-                <div class="product-quantity">
-                    <input type="number" min="0" value="${savedQuantity}" 
-                           data-price="${price}" 
-                           data-id="${product.ProductID}"
-                           onchange="updateTotal(this)">
+                <div class="product-info">
+                    <div class="product-name">${name}</div>
+                    <div class="product-description">${desc}</div>
+                    <div class="product-price">₱${price.toFixed(2)}</div>
+                    <div class="quantity-controls">
+                        <button class="qty-btn minus" data-id="${product.ProductID}" data-price="${price}" data-name="${encodeURIComponent(name)}">−</button>
+                        <span class="qty-display ${qty > 0 ? 'has-qty' : ''}" id="qty-${product.ProductID}">${qty}</span>
+                        <button class="qty-btn plus" data-id="${product.ProductID}" data-price="${price}" data-name="${encodeURIComponent(name)}">+</button>
+                    </div>
                 </div>
             `;
-            productGroups.appendChild(productDiv);
+            container.appendChild(card);
         });
 
-        updateDisplayedTotal();
+        // Event delegation for buttons
+        container.querySelectorAll('.qty-btn').forEach(btn => {
+            btn.addEventListener('click', handleQtyClick);
+        });
     }
 
-    // ====================================================================
-    // SETUP CATEGORY NAVIGATION
-    // ====================================================================
-    function setupCategoryNavigation() {
-        const categoryItems = document.querySelectorAll('.product-category-nav a');
-        
-        categoryItems.forEach(item => {
-            item.addEventListener('click', (e) => {
-                e.preventDefault();
-                categoryItems.forEach(nav => nav.classList.remove('active'));
-                e.target.classList.add('active');
+    function handleQtyClick(e) {
+        const btn = e.currentTarget;
+        const id = btn.dataset.id;
+        const price = parseFloat(btn.dataset.price);
+        const name = decodeURIComponent(btn.dataset.name);
+        const isPlus = btn.classList.contains('plus');
 
-                const categoryName = e.target.dataset.category;
-                const filteredProducts = filterProductsByCategory(categoryName);
-                displayProducts(filteredProducts);
+        const currentQty = selectedProducts[id]?.quantity || 0;
+        const newQty = isPlus ? currentQty + 1 : Math.max(0, currentQty - 1);
+
+        if (newQty > 0) {
+            selectedProducts[id] = { id, name, price, quantity: newQty };
+        } else {
+            delete selectedProducts[id];
+        }
+
+        const display = document.getElementById(`qty-${id}`);
+        if (display) {
+            display.textContent = newQty;
+            display.classList.toggle('has-qty', newQty > 0);
+        }
+
+        updateTotal();
+    }
+
+    function setupCategoryNavigation() {
+        document.querySelectorAll('.product-category-nav a').forEach(link => {
+            link.addEventListener('click', (e) => {
+                e.preventDefault();
+                document.querySelectorAll('.product-category-nav a').forEach(a => a.classList.remove('active'));
+                link.classList.add('active');
+                displayProducts(filterProductsByCategory(link.dataset.category));
             });
         });
     }
 
-    // ====================================================================
-    // UPDATE TOTAL PRICE
-    // ====================================================================
-    function updateTotal(input) {
-        const productId = input.dataset.id;
-        const price = parseFloat(input.dataset.price);
-        const quantity = parseInt(input.value) || 0;
-        const productName = input.closest('.product-item').querySelector('h3').textContent;
-
-        if (quantity > 0) {
-            selectedProducts[productId] = { id: productId, name: productName, price: price, quantity: quantity };
-        } else {
-            delete selectedProducts[productId];
-        }
-        updateDisplayedTotal();
-    }
-    
-    function updateDisplayedTotal() {
-        totalAmount = 0;
-        for (const productId in selectedProducts) {
-            const product = selectedProducts[productId];
-            totalAmount += product.quantity * product.price;
-        }
+    function updateTotal() {
+        totalAmount = Object.values(selectedProducts).reduce((sum, p) => sum + (p.price * p.quantity), 0);
         document.getElementById('total-price').textContent = totalAmount.toFixed(2);
     }
 
-    // ====================================================================
-    // CLOSE / POPUPS / CONFIRM
-    // ====================================================================
     function closeProductSelection() {
-        document.body.classList.remove('blur-background');
         document.getElementById('product-selection-panel').style.display = 'none';
-        selectedProducts = {};
-        totalAmount = 0;
-        updateDisplayedTotal();
     }
 
     function showConfirmationPopup() {
@@ -256,105 +188,76 @@
             alert('Please select at least one product.');
             return;
         }
-        document.getElementById('total-reservation').innerText = totalAmount.toFixed(2);
+        document.getElementById('total-reservation').textContent = totalAmount.toFixed(2);
         document.getElementById('confirmation-popup').style.display = 'flex';
     }
 
-    function closePopup(popupId) {
-        document.getElementById(popupId).style.display = 'none';
+    function closePopup(id) {
+        document.getElementById(id).style.display = 'none';
     }
 
-    // ====================================================================
-    // CONFIRM AND SAVE RESERVATION
-    // ====================================================================
     async function confirmReservation() {
-        const selectedProductsList = [];
-        for (const productId in selectedProducts) {
-            const product = selectedProducts[productId];
-            selectedProductsList.push({ id: productId, name: product.name, quantity: product.quantity, price: product.price });
-        }
+        const items = Object.values(selectedProducts).map(p => ({
+            id: p.id, name: p.name, quantity: p.quantity, price: p.price
+        }));
 
-        if (selectedProductsList.length === 0) {
-            alert('Please select at least one product.');
-            return;
-        }
+        if (items.length === 0) return alert('Please select products.');
+
+        const user = JSON.parse(localStorage.getItem('currentUser'));
+        if (!user) return alert('Please log in.'), window.location.href = 'Login.html';
+
+        const formData = sessionStorage.getItem('cateringFormData');
+        if (!formData) return alert('Please fill catering form first.'), window.location.href = 'CaterReservation.html';
+
+        const catering = JSON.parse(formData);
+        const body = new FormData();
+        body.append('customer_id', user.customerId || '');
+        body.append('customer_name', `${user.firstName || ''} ${user.lastName || ''}`);
+        body.append('customer_email', user.email || '');
+        body.append('customer_phone', user.contactNumber || '');
+        body.append('event_date', catering.date || '');
+        body.append('event_time', catering.time || '');
+        body.append('guests', catering.guests || '1');
+        body.append('event_type', catering.eventType || '');
+        body.append('total_price', totalAmount.toFixed(2));
+        body.append('selected_products', JSON.stringify(items));
+
+        const btn = document.querySelector('#confirmation-popup button:first-of-type');
+        btn.textContent = 'Saving...';
+        btn.disabled = true;
 
         try {
-            const user = JSON.parse(localStorage.getItem('currentUser'));
-            if (!user) {
-                alert('User session expired. Please log in again.');
-                window.location.href = 'Login.html';
-                return;
-            }
-
-            const formData = sessionStorage.getItem('cateringFormData');
-            if (!formData) {
-                alert('Form data not found. Please restart the reservation process.');
-                window.location.href = 'CaterReservation.html';
-                return;
-            }
-
-            const cateringData = JSON.parse(formData);
-            const requestBody = new FormData();
-            requestBody.append("customer_id", user.customerId || '');
-            requestBody.append("customer_name", (user.firstName || '') + " " + (user.lastName || ''));
-            requestBody.append("customer_email", user.email || '');
-            requestBody.append("customer_phone", user.contactNumber || '');
-            requestBody.append("event_date", cateringData.date || '');
-            requestBody.append("event_time", cateringData.time || '');
-            requestBody.append("guests", cateringData.guests || '1');
-            requestBody.append("event_type", cateringData.eventType || '');
-            requestBody.append("total_price", totalAmount.toFixed(2));
-            requestBody.append("selected_products", JSON.stringify(selectedProductsList));
-
-            const confirmBtn = document.querySelector('#confirmation-popup button:first-of-type');
-            confirmBtn.textContent = 'Saving...';
-            confirmBtn.disabled = true;
-
-            const response = await fetch('save_product_reservation.php', {
-                method: 'POST',
-                body: requestBody,
-                headers: { 'X-Requested-With': 'XMLHttpRequest' }
+            const res = await fetch('save_product_reservation.php', {
+                method: 'POST', body, headers: { 'X-Requested-With': 'XMLHttpRequest' }
             });
-
-            if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
-            const data = await response.json();
+            const data = await res.json();
 
             if (data.status === 'success') {
                 closePopup('confirmation-popup');
                 document.getElementById('success-popup').style.display = 'flex';
             } else {
-                throw new Error(data.message || 'Unknown error occurred');
+                throw new Error(data.message || 'Error');
             }
-
-        } catch (error) {
-            console.error('Error saving reservation:', error);
-            alert('An error occurred while saving your reservation:\n' + error.message);
-            const confirmBtn = document.querySelector('#confirmation-popup button:first-of-type');
-            confirmBtn.textContent = 'Yes';
-            confirmBtn.disabled = false;
+        } catch (err) {
+            alert('Error: ' + err.message);
+            btn.textContent = 'Yes, Submit';
+            btn.disabled = false;
         }
     }
 
     function redirectToReservation() {
         sessionStorage.removeItem('cateringFormData');
-        window.location.href = "CaterReservation.html";
+        window.location.href = 'CaterReservation.html';
     }
 
-    // ====================================================================
-    // PAGE INITIALIZATION
-    // ====================================================================
     document.addEventListener('DOMContentLoaded', () => {
-        const user = JSON.parse(localStorage.getItem('currentUser'));
-        if (!user) {
+        if (!localStorage.getItem('currentUser')) {
             alert('Please log in first.');
-            window.location.href = 'Login.html';
-            return;
+            return window.location.href = 'Login.html';
         }
-        const formData = sessionStorage.getItem('cateringFormData');
-        if (!formData) {
+        if (!sessionStorage.getItem('cateringFormData')) {
             alert('Please complete the catering form first.');
-            window.location.href = 'CaterReservation.html';
+            return window.location.href = 'CaterReservation.html';
         }
     });
     </script>
