@@ -29,3 +29,12 @@ Stack trace:
 #0 D:\XAMPP\htdocs\TrialWeb\TrialWorkIM\Tabeya\save_product_reservation.php(303): mysqli_stmt->bind_param('sdssi', 'GCash', 750.0, 'uploads/gcash_r...', 'receipt_7_17637...', 'Pending', 1)
 #1 {main}
   thrown in D:\XAMPP\htdocs\TrialWeb\TrialWorkIM\Tabeya\save_product_reservation.php on line 303
+[22-Nov-2025 08:11:31 Europe/Berlin] SUCCESS: Reservation 1 created/updated for customer 7
+[22-Nov-2025 08:12:52 Europe/Berlin] SUCCESS: Reservation 1 created/updated for customer 7
+[22-Nov-2025 08:15:23 Europe/Berlin] SUCCESS: Reservation 1 created/updated for customer 7
+[22-Nov-2025 08:22:31 Europe/Berlin] SUCCESS: Reservation 1 created/updated for customer 7
+[22-Nov-2025 08:32:36 Europe/Berlin] SUCCESS: New reservation #2 created for customer 7
+[22-Nov-2025 08:42:47 Europe/Berlin] SUCCESS: New reservation #3 created for customer 7
+[22-Nov-2025 08:48:41 Europe/Berlin] TRANSACTION ERROR: Unknown column 'ServiceType' in 'field list'
+[22-Nov-2025 08:50:06 Europe/Berlin] TRANSACTION ERROR: Column count doesn't match value count at row 1
+[22-Nov-2025 08:53:14 Europe/Berlin] SUCCESS: New reservation #4 created for customer 7
