@@ -5,7 +5,545 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Reservation Information</title>
     <link rel="stylesheet" href="CSS/userInfoDesign.css">
-   
+    <style>
+        /* ============================================ */
+        /* ORDER SUMMARY OVERLAY */
+        /* ============================================ */
+        .order-summary-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.7);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 2500;
+            overflow-y: auto;
+            padding: 20px 0;
+        }
+
+        .order-summary-content {
+            background: white;
+            padding: 30px;
+            border-radius: 12px;
+            max-width: 550px;
+            width: 90%;
+            margin: auto;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+        }
+
+        .order-summary-content h2 {
+            color: #bc1823;
+            font-size: 24px;
+            margin-bottom: 20px;
+            text-align: center;
+            border-bottom: 2px solid #bc1823;
+            padding-bottom: 10px;
+        }
+
+        .order-items-list {
+            margin-bottom: 20px;
+            max-height: 300px;
+            overflow-y: auto;
+        }
+
+        .order-item-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            padding: 12px;
+            background: #f9f9f9;
+            margin-bottom: 10px;
+            border-radius: 6px;
+            border-left: 4px solid #bc1823;
+        }
+
+        .order-item-info h3 {
+            margin: 0;
+            color: #333;
+            font-size: 16px;
+            font-weight: bold;
+        }
+
+        .order-item-info p {
+            margin: 5px 0 0 0;
+            color: #777;
+            font-size: 14px;
+        }
+
+        .order-item-price {
+            text-align: right;
+            font-weight: bold;
+            white-space: nowrap;
+        }
+
+        .order-item-quantity {
+            color: #bc1823;
+            font-size: 18px;
+            font-weight: bold;
+            display: block;
+        }
+
+        .order-item-subtotal {
+            color: #333;
+            font-size: 14px;
+            display: block;
+        }
+
+        .special-requests-section {
+            background: #f0f8ff;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            border-left: 4px solid #bc1823;
+        }
+
+        .special-requests-section label {
+            display: block;
+            font-weight: bold;
+            color: #333;
+            margin-bottom: 8px;
+            font-size: 14px;
+        }
+
+        .special-requests-section textarea {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-family: Arial, sans-serif;
+            font-size: 14px;
+            resize: vertical;
+            min-height: 80px;
+            box-sizing: border-box;
+        }
+
+        .special-requests-section textarea:focus {
+            outline: none;
+            border-color: #bc1823;
+            box-shadow: 0 0 5px rgba(188, 24, 35, 0.3);
+        }
+
+        .order-divider {
+            border-top: 2px solid #eee;
+            margin: 20px 0;
+        }
+
+        .order-total {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px;
+            background: #fffacd;
+            border-radius: 6px;
+            font-size: 18px;
+            font-weight: bold;
+            margin-bottom: 20px;
+        }
+
+        .order-total span {
+            color: #bc1823;
+            font-size: 24px;
+        }
+
+        .order-actions {
+            display: flex;
+            gap: 10px;
+        }
+
+        .order-back-btn, .order-proceed-btn {
+            flex: 1;
+            padding: 12px;
+            border: none;
+            border-radius: 6px;
+            font-size: 15px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .order-back-btn {
+            background: #666;
+            color: white;
+        }
+
+        .order-back-btn:hover {
+            background: #555;
+        }
+
+        .order-proceed-btn {
+            background: #28a745;
+            color: white;
+        }
+
+        .order-proceed-btn:hover {
+            background: #218838;
+        }
+
+        /* ============================================ */
+        /* DELIVERY OPTIONS SECTION */
+        /* ============================================ */
+        .delivery-section {
+            background: #f0f8ff;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            border-left: 4px solid #bc1823;
+        }
+
+        .delivery-section label {
+            display: block;
+            font-weight: bold;
+            color: #333;
+            margin-bottom: 12px;
+            font-size: 14px;
+        }
+
+        .delivery-options {
+            display: flex;
+            gap: 20px;
+            margin-bottom: 15px;
+        }
+
+        .delivery-option {
+            display: flex;
+            align-items: center;
+            flex: 1;
+        }
+
+        .delivery-option input[type="radio"] {
+            width: 18px;
+            height: 18px;
+            cursor: pointer;
+            margin-right: 8px;
+        }
+
+        .delivery-option label {
+            margin: 0;
+            cursor: pointer;
+            font-weight: normal;
+        }
+
+        .delivery-address-box {
+            display: none;
+            background: white;
+            padding: 12px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            margin-top: 10px;
+        }
+
+        .delivery-address-box.show {
+            display: block;
+        }
+
+        .delivery-address-box input {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-family: Arial, sans-serif;
+            font-size: 14px;
+            box-sizing: border-box;
+        }
+
+        .delivery-address-box input:focus {
+            outline: none;
+            border-color: #bc1823;
+            box-shadow: 0 0 5px rgba(188, 24, 35, 0.3);
+        }
+
+        .delivery-address-box p {
+            margin: 8px 0 0 0;
+            font-size: 12px;
+            color: #666;
+        }
+
+        /* ============================================ */
+        /* PAYMENT SECTION */
+        /* ============================================ */
+        .payment-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.7);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 2600;
+            overflow-y: auto;
+            padding: 20px 0;
+        }
+
+        .payment-content {
+            background: white;
+            padding: 30px;
+            border-radius: 12px;
+            max-width: 600px;
+            width: 90%;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+            margin: auto;
+        }
+
+        .payment-header {
+            text-align: center;
+            margin-bottom: 25px;
+        }
+
+        .payment-header h2 {
+            color: #bc1823;
+            font-size: 24px;
+            margin: 0 0 10px 0;
+        }
+
+        .payment-header p {
+            color: #666;
+            font-size: 14px;
+            margin: 0;
+        }
+
+        .payment-method-box {
+            background: #f9f9f9;
+            padding: 20px;
+            border-radius: 8px;
+            border-left: 5px solid #bc1823;
+            margin-bottom: 20px;
+        }
+
+        .payment-method-box h3 {
+            margin: 0 0 10px 0;
+            color: #333;
+            font-size: 16px;
+        }
+
+        .payment-method-box .method-icon {
+            font-size: 32px;
+            margin-bottom: 10px;
+        }
+
+        .payment-amount {
+            background: #fffacd;
+            padding: 15px;
+            border-radius: 8px;
+            text-align: center;
+            margin-bottom: 20px;
+            font-weight: bold;
+        }
+
+        .payment-amount p {
+            margin: 0 0 8px 0;
+            color: #666;
+            font-size: 14px;
+        }
+
+        .payment-amount .amount {
+            font-size: 28px;
+            color: #bc1823;
+        }
+
+        .upload-section {
+            margin-bottom: 20px;
+        }
+
+        .upload-section label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: bold;
+            color: #333;
+            font-size: 14px;
+        }
+
+        .upload-section p {
+            color: #777;
+            font-size: 12px;
+            margin: 0 0 10px 0;
+            background: #f0f0f0;
+            padding: 10px;
+            border-radius: 4px;
+        }
+
+        .file-input-wrapper {
+            position: relative;
+            overflow: hidden;
+            display: inline-block;
+            width: 100%;
+        }
+
+        .file-input-wrapper input[type=file] {
+            position: absolute;
+            left: -9999px;
+        }
+
+        .file-input-label {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            background: #f0f0f0;
+            border: 2px dashed #bc1823;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.2s;
+            font-weight: bold;
+            color: #bc1823;
+        }
+
+        .file-input-label:hover {
+            background: #ffe0e0;
+        }
+
+        .file-input-label.has-file {
+            background: #e8f5e9;
+            border-color: #28a745;
+            color: #28a745;
+        }
+
+        .file-name-display {
+            margin-top: 10px;
+            padding: 10px;
+            background: #f9f9f9;
+            border-radius: 4px;
+            font-size: 14px;
+            color: #333;
+            display: none;
+            word-break: break-word;
+        }
+
+        .file-name-display.show {
+            display: block;
+        }
+
+        .payment-actions {
+            display: flex;
+            gap: 10px;
+        }
+
+        .payment-cancel-btn, .payment-confirm-btn {
+            flex: 1;
+            padding: 12px;
+            border: none;
+            border-radius: 6px;
+            font-size: 15px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .payment-cancel-btn {
+            background: #666;
+            color: white;
+        }
+
+        .payment-cancel-btn:hover {
+            background: #555;
+        }
+
+        .payment-confirm-btn {
+            background: #ccc;
+            color: #999;
+            cursor: not-allowed;
+        }
+
+        .payment-confirm-btn.active {
+            background: #28a745;
+            color: white;
+            cursor: pointer;
+        }
+
+        .payment-confirm-btn.active:hover {
+            background: #218838;
+        }
+
+        /* ============================================ */
+        /* SUCCESS MESSAGE */
+        /* ============================================ */
+        .success-popup {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.7);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 2700;
+        }
+
+        .success-popup-content {
+            background: white;
+            padding: 40px 30px;
+            border-radius: 12px;
+            text-align: center;
+            max-width: 400px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+        }
+
+        .success-popup-icon {
+            font-size: 60px;
+            margin-bottom: 15px;
+            animation: bounce 0.6s;
+        }
+
+        @keyframes bounce {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-10px); }
+        }
+
+        .success-popup-content h2 {
+            color: #28a745;
+            margin: 0 0 10px 0;
+            font-size: 22px;
+        }
+
+        .success-popup-content p {
+            color: #666;
+            margin: 10px 0;
+            line-height: 1.6;
+        }
+
+        .success-popup-content button {
+            margin-top: 20px;
+            padding: 12px 30px;
+            background: #bc1823;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            font-size: 15px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+
+        .success-popup-content button:hover {
+            background: #a01520;
+        }
+
+        @media (max-width: 680px) {
+            .order-summary-content,
+            .payment-content {
+                width: 95%;
+                padding: 20px;
+            }
+
+            .order-summary-content h2,
+            .payment-header h2 {
+                font-size: 20px;
+            }
+
+            .payment-amount .amount {
+                font-size: 24px;
+            }
+
+            .delivery-options {
+                flex-direction: column;
+                gap: 12px;
+            }
+        }
+    </style>
 </head>
 <body>
     <div class="background">
@@ -38,26 +576,104 @@
             </div>
             <div class="btn-group">
                 <button class="cancel-btn" onclick="closeProductSelection()">Cancel</button>
-                <button class="submit-btn" onclick="showConfirmationPopup()">Confirm Order</button>
+                <button class="submit-btn" onclick="showOrderSummary()">Confirm Order</button>
             </div>
         </div>
     </div>
 
-    <!-- Confirmation Popup -->
-    <div class="popup-overlay" id="confirmation-popup">
-        <div class="popup-content">
-            <p>Confirm your order?<br><br><strong style="font-size:24px;color:#bc1823;">₱<span id="total-reservation"></span></strong></p>
-            <button onclick="confirmReservation()">Yes, Submit</button>
-            <button onclick="closePopup('confirmation-popup')">Cancel</button>
+    <!-- Order Summary Overlay with Special Requests & Delivery Options -->
+    <div class="order-summary-overlay" id="order-summary-overlay">
+        <div class="order-summary-content">
+            <h2>Order Summary</h2>
+            <div class="order-items-list" id="order-items-list"></div>
+            
+            <div class="order-divider"></div>
+            
+            <!-- Special Requests Section -->
+            <div class="special-requests-section">
+                <label for="special-requests-input">📝 Special Requests or Notes (Optional)</label>
+                <textarea id="special-requests-input" placeholder="E.g., No spicy, extra serving of sauce, specific arrangements..."></textarea>
+            </div>
+
+            <!-- Delivery Options Section -->
+            <div class="delivery-section">
+                <label>🚚 Delivery Option *</label>
+                <div class="delivery-options">
+                    <div class="delivery-option">
+                        <input type="radio" id="delivery-pickup" name="delivery-option" value="Pickup" checked>
+                        <label for="delivery-pickup">Pickup at Restaurant</label>
+                    </div>
+                    <div class="delivery-option">
+                        <input type="radio" id="delivery-deliver" name="delivery-option" value="Delivery">
+                        <label for="delivery-deliver">Delivery to Address</label>
+                    </div>
+                </div>
+                <div class="delivery-address-box" id="delivery-address-box">
+                    <input type="text" id="delivery-address-input" placeholder="Enter your full delivery address..." maxlength="500">
+                    <p>✓ Delivery available within Poblacion, Vinzons</p>
+                </div>
+            </div>
+
+            <div class="order-divider"></div>
+            
+            <div class="order-total">
+                <span>Total Amount:</span>
+                <span id="order-total-amount">₱0.00</span>
+            </div>
+            
+            <div class="order-actions">
+                <button class="order-back-btn" onclick="closeOrderSummary()">Back to Products</button>
+                <button class="order-proceed-btn" onclick="showPaymentSection()">Proceed to Payment</button>
+            </div>
         </div>
     </div>
 
-    <!-- Success Popup -->
-    <div class="popup-overlay" id="success-popup">
-        <div class="popup-content">
-            <p style="font-size:40px;margin-bottom:10px;">✅</p>
-            <p><strong>Order Received!</strong><br><br>Our staff will contact you shortly for delivery details.<br><br>Thank you for choosing <strong style="color:#bc1823;">TABEYA!</strong></p>
-            <button onclick="redirectToReservation()">Done</button>
+    <!-- Payment Section -->
+    <div class="payment-overlay" id="payment-overlay">
+        <div class="payment-content">
+            <div class="payment-header">
+                <h2>Payment Information</h2>
+                <p>Complete your reservation by uploading your GCash receipt</p>
+            </div>
+
+            <div class="payment-method-box">
+                <div class="method-icon">💳</div>
+                <h3>Payment Method: GCash</h3>
+                <p>Please transfer the amount to the registered GCash number and upload a screenshot of your receipt.</p>
+            </div>
+
+            <div class="payment-amount">
+                <p>Total Amount to Pay:</p>
+                <div class="amount" id="payment-total-amount">₱0.00</div>
+            </div>
+
+            <div class="upload-section">
+                <label for="gcash-receipt">Upload GCash Receipt Screenshot *</label>
+                <p>📌 Please upload a clear screenshot showing transaction details</p>
+                <div class="file-input-wrapper">
+                    <input type="file" id="gcash-receipt" accept="image/*" onchange="handleFileUpload(event)">
+                    <label for="gcash-receipt" class="file-input-label">
+                        <span>📷 Click to select or drag image here</span>
+                    </label>
+                </div>
+                <div class="file-name-display" id="file-name-display"></div>
+            </div>
+
+            <div class="payment-actions">
+                <button class="payment-cancel-btn" onclick="closePaymentSection()">Cancel</button>
+                <button class="payment-confirm-btn" id="confirm-payment-btn" onclick="submitPayment()" disabled>Confirm Payment</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Success Message -->
+    <div class="success-popup" id="success-popup">
+        <div class="success-popup-content">
+            <div class="success-popup-icon">✅</div>
+            <h2>Payment Received!</h2>
+            <p>Thank you for your order!</p>
+            <p>Our owner will contact you shortly to confirm your catering reservation.</p>
+            <button onclick="redirectToCaterReservation()">Done</button>
         </div>
     </div>
 
@@ -65,6 +681,14 @@
     let allProducts = [];
     let selectedProducts = {};
     let totalAmount = 0;
+    let uploadedFile = null;
+    let specialRequests = '';
+    let deliveryOption = 'Pickup';
+    let deliveryAddress = '';
+
+    // ============================================================
+    // PRODUCT SELECTION
+    // ============================================================
 
     async function initializeProductSelection() {
         try {
@@ -79,8 +703,6 @@
             if (!data.success) throw new Error(data.message || 'Failed to fetch products');
 
             allProducts = data.products || [];
-            console.log('Loaded', allProducts.length, 'products');
-
             displayProducts(filterProductsByCategory('PLATTER'));
             setupCategoryNavigation();
 
@@ -107,7 +729,6 @@
         products.forEach(product => {
             const qty = selectedProducts[product.ProductID]?.quantity || 0;
             const price = parseFloat(product.Price);
-            const img = product.Image || '';
             const name = product.ProductName || 'Product';
             const desc = product.Description || 'Delicious dish from Tabeya';
 
@@ -116,7 +737,7 @@
 
             card.innerHTML = `
                 <div class="product-image">
-                    ${img ? `<img src="${img}" alt="${name}" onerror="this.style.display='none';this.nextElementSibling.style.display='block'"><span class="placeholder-icon" style="display:none">🍽️</span>` : '<span class="placeholder-icon">🍽️</span>'}
+                    <span class="placeholder-icon">🍽️</span>
                 </div>
                 <div class="product-info">
                     <div class="product-name">${name}</div>
@@ -132,7 +753,6 @@
             container.appendChild(card);
         });
 
-        // Event delegation for buttons
         container.querySelectorAll('.qty-btn').forEach(btn => {
             btn.addEventListener('click', handleQtyClick);
         });
@@ -183,70 +803,200 @@
         document.getElementById('product-selection-panel').style.display = 'none';
     }
 
-    function showConfirmationPopup() {
+    // ============================================================
+    // ORDER SUMMARY
+    // ============================================================
+
+    function showOrderSummary() {
         if (Object.keys(selectedProducts).length === 0) {
             alert('Please select at least one product.');
             return;
         }
-        document.getElementById('total-reservation').textContent = totalAmount.toFixed(2);
-        document.getElementById('confirmation-popup').style.display = 'flex';
+
+        const itemsList = document.getElementById('order-items-list');
+        itemsList.innerHTML = '';
+
+        Object.values(selectedProducts).forEach(product => {
+            const subtotal = product.price * product.quantity;
+            const itemDiv = document.createElement('div');
+            itemDiv.className = 'order-item-row';
+            itemDiv.innerHTML = `
+                <div class="order-item-info">
+                    <h3>${product.name}</h3>
+                    <p>@ ₱${product.price.toFixed(2)} each</p>
+                </div>
+                <div class="order-item-price">
+                    <span class="order-item-quantity">x${product.quantity}</span>
+                    <span class="order-item-subtotal">₱${subtotal.toFixed(2)}</span>
+                </div>
+            `;
+            itemsList.appendChild(itemDiv);
+        });
+
+        document.getElementById('order-total-amount').textContent = `₱${totalAmount.toFixed(2)}`;
+        
+        // Setup delivery option listener
+        document.querySelectorAll('input[name="delivery-option"]').forEach(radio => {
+            radio.addEventListener('change', handleDeliveryOptionChange);
+        });
+        
+        document.getElementById('order-summary-overlay').style.display = 'flex';
     }
 
-    function closePopup(id) {
-        document.getElementById(id).style.display = 'none';
+    function handleDeliveryOptionChange(e) {
+        deliveryOption = e.target.value;
+        const addressBox = document.getElementById('delivery-address-box');
+        
+        if (deliveryOption === 'Delivery') {
+            addressBox.classList.add('show');
+        } else {
+            addressBox.classList.remove('show');
+            deliveryAddress = '';
+        }
     }
 
-    async function confirmReservation() {
-        const items = Object.values(selectedProducts).map(p => ({
-            id: p.id, name: p.name, quantity: p.quantity, price: p.price
-        }));
+    function closeOrderSummary() {
+        document.getElementById('order-summary-overlay').style.display = 'none';
+    }
 
-        if (items.length === 0) return alert('Please select products.');
+    // ============================================================
+    // PAYMENT SECTION
+    // ============================================================
 
-        const user = JSON.parse(localStorage.getItem('currentUser'));
-        if (!user) return alert('Please log in.'), window.location.href = 'Login.html';
+    function showPaymentSection() {
+        // Validate delivery option
+        if (deliveryOption === 'Delivery') {
+            deliveryAddress = document.getElementById('delivery-address-input').value.trim();
+            if (!deliveryAddress) {
+                alert('Please enter a delivery address.');
+                return;
+            }
+        }
 
-        const formData = sessionStorage.getItem('cateringFormData');
-        if (!formData) return alert('Please fill catering form first.'), window.location.href = 'CaterReservation.html';
+        // Get special requests
+        specialRequests = document.getElementById('special-requests-input').value.trim();
 
-        const catering = JSON.parse(formData);
-        const body = new FormData();
-        body.append('customer_id', user.customerId || '');
-        body.append('customer_name', `${user.firstName || ''} ${user.lastName || ''}`);
-        body.append('customer_email', user.email || '');
-        body.append('customer_phone', user.contactNumber || '');
-        body.append('event_date', catering.date || '');
-        body.append('event_time', catering.time || '');
-        body.append('guests', catering.guests || '1');
-        body.append('event_type', catering.eventType || '');
-        body.append('total_price', totalAmount.toFixed(2));
-        body.append('selected_products', JSON.stringify(items));
+        // Reset file upload
+        uploadedFile = null;
+        document.getElementById('gcash-receipt').value = '';
+        document.getElementById('file-name-display').textContent = '';
+        document.getElementById('file-name-display').classList.remove('show');
+        document.getElementById('confirm-payment-btn').disabled = true;
+        document.getElementById('confirm-payment-btn').classList.remove('active');
+        document.querySelector('.file-input-label').classList.remove('has-file');
 
-        const btn = document.querySelector('#confirmation-popup button:first-of-type');
-        btn.textContent = 'Saving...';
+        document.getElementById('payment-total-amount').textContent = `₱${totalAmount.toFixed(2)}`;
+        document.getElementById('order-summary-overlay').style.display = 'none';
+        document.getElementById('payment-overlay').style.display = 'flex';
+    }
+
+    function closePaymentSection() {
+        document.getElementById('payment-overlay').style.display = 'none';
+    }
+
+    function handleFileUpload(event) {
+        const file = event.target.files[0];
+        if (!file) return;
+
+        const validTypes = ['image/jpeg', 'image/png', 'image/gif', 'image/webp'];
+        if (!validTypes.includes(file.type)) {
+            alert('Please upload a valid image file (JPG, PNG, GIF, or WebP).');
+            event.target.value = '';
+            return;
+        }
+
+        const maxSize = 5 * 1024 * 1024;
+        if (file.size > maxSize) {
+            alert('File size must be less than 5MB.');
+            event.target.value = '';
+            return;
+        }
+
+        uploadedFile = file;
+        document.getElementById('file-name-display').textContent = `✓ File selected: ${file.name}`;
+        document.getElementById('file-name-display').classList.add('show');
+        document.querySelector('.file-input-label').classList.add('has-file');
+
+        document.getElementById('confirm-payment-btn').disabled = false;
+        document.getElementById('confirm-payment-btn').classList.add('active');
+    }
+
+    async function submitPayment() {
+        if (!uploadedFile) {
+            alert('Please upload a GCash receipt screenshot.');
+            return;
+        }
+
+        if (Object.keys(selectedProducts).length === 0) {
+            alert('No products selected.');
+            return;
+        }
+
+        const btn = document.getElementById('confirm-payment-btn');
+        btn.textContent = 'Processing...';
         btn.disabled = true;
 
         try {
+            const user = JSON.parse(localStorage.getItem('currentUser'));
+            if (!user) throw new Error('User not logged in');
+
+            const formData = sessionStorage.getItem('cateringFormData');
+            if (!formData) throw new Error('Catering form data not found');
+
+            const catering = JSON.parse(formData);
+            const items = Object.values(selectedProducts).map(p => ({
+                id: p.id,
+                name: p.name,
+                quantity: p.quantity,
+                price: p.price
+            }));
+
+            const body = new FormData();
+            body.append('customer_id', user.customerId || '');
+            body.append('customer_name', `${user.firstName || ''} ${user.lastName || ''}`);
+            body.append('customer_email', user.email || '');
+            body.append('customer_phone', user.contactNumber || '');
+            body.append('event_date', catering.date || '');
+            body.append('event_time', catering.time || '');
+            body.append('guests', catering.guests || '1');
+            body.append('event_type', catering.eventType || '');
+            body.append('total_price', totalAmount.toFixed(2));
+            body.append('selected_products', JSON.stringify(items));
+            body.append('gcash_receipt', uploadedFile);
+            body.append('payment_method', 'GCash');
+            body.append('special_requests', specialRequests);
+            body.append('delivery_option', deliveryOption);
+            body.append('delivery_address', deliveryAddress);
+
             const res = await fetch('save_product_reservation.php', {
-                method: 'POST', body, headers: { 'X-Requested-With': 'XMLHttpRequest' }
+                method: 'POST',
+                body,
+                headers: { 'X-Requested-With': 'XMLHttpRequest' }
             });
+
             const data = await res.json();
 
             if (data.status === 'success') {
-                closePopup('confirmation-popup');
+                document.getElementById('payment-overlay').style.display = 'none';
                 document.getElementById('success-popup').style.display = 'flex';
             } else {
-                throw new Error(data.message || 'Error');
+                throw new Error(data.message || 'Payment processing failed');
             }
-        } catch (err) {
-            alert('Error: ' + err.message);
-            btn.textContent = 'Yes, Submit';
+        } catch (error) {
+            alert('Error: ' + error.message);
+            btn.textContent = 'Confirm Payment';
             btn.disabled = false;
         }
     }
 
-    function redirectToReservation() {
+    function redirectToCaterReservation() {
         sessionStorage.removeItem('cateringFormData');
+        selectedProducts = {};
+        totalAmount = 0;
+        uploadedFile = null;
+        specialRequests = '';
+        deliveryOption = 'Pickup';
+        deliveryAddress = '';
         window.location.href = 'CaterReservation.html';
     }
 
