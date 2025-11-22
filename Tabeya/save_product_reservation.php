@@ -1,93 +1,112 @@
 <?php
 /**
- * SAVE PRODUCT RESERVATION WITH GCASH PAYMENT
- * Handles: Products, GCash Receipt Upload, Special Requests, Delivery Options
+ * SAVE PRODUCT RESERVATION - FIXED VERSION
+ * Handles products, GCash receipt, delivery options
  */
 
-ob_start();
+// Enable error logging
 error_reporting(E_ALL);
 ini_set('display_errors', 0);
 ini_set('log_errors', 1);
-ini_set('error_log', __DIR__ . '/error.log');
+ini_set('error_log', __DIR__ . '/reservation_error.log');
 
-$servername = "localhost";
-$username = "root";
-$password = "";
-$dbname = "tabeya_system";
+// Start output buffering
+ob_start();
 
+// Set JSON header
 header('Content-Type: application/json; charset=utf-8');
 
 try {
-    if (!isset($_SERVER['HTTP_X_REQUESTED_WITH']) || 
-        strtolower($_SERVER['HTTP_X_REQUESTED_WITH']) !== 'xmlhttprequest') {
-        http_response_code(400);
-        echo json_encode(["status" => "error", "message" => "Invalid request"]);
-        ob_end_flush();
-        exit;
-    }
-
+    // ============================================================
+    // REQUEST VALIDATION
+    // ============================================================
+    
     if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
         http_response_code(405);
-        echo json_encode(["status" => "error", "message" => "Only POST requests allowed"]);
-        ob_end_flush();
-        exit;
+        die(json_encode(["status" => "error", "message" => "POST required"]));
     }
 
-    $conn = new mysqli($servername, $username, $password, $dbname);
+    // Check if AJAX request
+    $is_ajax = isset($_SERVER['HTTP_X_REQUESTED_WITH']) && 
+               strtolower($_SERVER['HTTP_X_REQUESTED_WITH']) === 'xmlhttprequest';
+    
+    if (!$is_ajax) {
+        // Still accept if data is present
+        if (empty($_POST) && empty($_FILES)) {
+            http_response_code(400);
+            die(json_encode(["status" => "error", "message" => "Invalid request format"]));
+        }
+    }
+
+    // ============================================================
+    // DATABASE CONNECTION
+    // ============================================================
+
+    $servername = "localhost";
+    $db_username = "root";
+    $db_password = "";
+    $dbname = "tabeya_system";
+
+    $conn = new mysqli($servername, $db_username, $db_password, $dbname);
 
     if ($conn->connect_error) {
         http_response_code(500);
-        echo json_encode(["status" => "error", "message" => "Database connection failed"]);
-        ob_end_flush();
-        exit;
+        die(json_encode([
+            "status" => "error", 
+            "message" => "Database connection failed: " . $conn->connect_error
+        ]));
     }
 
     $conn->set_charset("utf8mb4");
 
     // ============================================================
-    // PARSE INPUT DATA
+    // PARSE & VALIDATE INPUT DATA
     // ============================================================
 
     $customer_id = isset($_POST['customer_id']) ? intval($_POST['customer_id']) : 0;
+    $customer_name = isset($_POST['customer_name']) ? trim($_POST['customer_name']) : '';
+    $customer_email = isset($_POST['customer_email']) ? trim($_POST['customer_email']) : '';
+    $customer_phone = isset($_POST['customer_phone']) ? trim($_POST['customer_phone']) : '';
+    $event_date = isset($_POST['event_date']) ? $_POST['event_date'] : '';
+    $event_time = isset($_POST['event_time']) ? $_POST['event_time'] : '';
+    $guests = isset($_POST['guests']) ? intval($_POST['guests']) : 0;
+    $event_type = isset($_POST['event_type']) ? trim($_POST['event_type']) : '';
     $total_price = isset($_POST['total_price']) ? floatval($_POST['total_price']) : 0;
     $products_json = isset($_POST['selected_products']) ? $_POST['selected_products'] : '[]';
     $payment_method = isset($_POST['payment_method']) ? $_POST['payment_method'] : 'Cash';
     $special_requests = isset($_POST['special_requests']) ? trim($_POST['special_requests']) : '';
     $delivery_option = isset($_POST['delivery_option']) ? $_POST['delivery_option'] : 'Pickup';
     $delivery_address = isset($_POST['delivery_address']) ? trim($_POST['delivery_address']) : '';
-    
-    $products = json_decode($products_json, true);
-    
-    if (json_last_error() !== JSON_ERROR_NONE) {
-        http_response_code(400);
-        echo json_encode(["status" => "error", "message" => "Invalid product data"]);
-        $conn->close();
-        ob_end_flush();
-        exit;
+
+    // Parse products
+    $products = @json_decode($products_json, true);
+    if (!is_array($products)) {
+        $products = [];
     }
 
-    // ============================================================
-    // VALIDATE INPUT
-    // ============================================================
-
-    if (empty($customer_id) || empty($products) || count($products) === 0) {
+    // Validate required fields
+    if ($customer_id <= 0) {
         http_response_code(400);
-        echo json_encode(["status" => "error", "message" => "Missing required data"]);
-        $conn->close();
-        ob_end_flush();
-        exit;
+        die(json_encode(["status" => "error", "message" => "Invalid customer ID"]));
+    }
+
+    if (empty($event_date) || empty($event_time)) {
+        http_response_code(400);
+        die(json_encode(["status" => "error", "message" => "Event date/time required"]));
+    }
+
+    if (count($products) === 0) {
+        http_response_code(400);
+        die(json_encode(["status" => "error", "message" => "No products selected"]));
     }
 
     if ($delivery_option === 'Delivery' && empty($delivery_address)) {
         http_response_code(400);
-        echo json_encode(["status" => "error", "message" => "Delivery address required"]);
-        $conn->close();
-        ob_end_flush();
-        exit;
+        die(json_encode(["status" => "error", "message" => "Delivery address required"]));
     }
 
     // ============================================================
-    // HANDLE GCASH RECEIPT UPLOAD
+    // HANDLE FILE UPLOAD
     // ============================================================
 
     $receipt_path = null;
@@ -96,295 +115,232 @@ try {
     if ($payment_method === 'GCash' && isset($_FILES['gcash_receipt'])) {
         $file = $_FILES['gcash_receipt'];
 
-        // Validate file
-        $allowed_types = ['image/jpeg', 'image/png', 'image/gif', 'image/webp'];
-        if (!in_array($file['type'], $allowed_types)) {
-            http_response_code(400);
-            echo json_encode(["status" => "error", "message" => "Invalid file type"]);
-            $conn->close();
-            ob_end_flush();
-            exit;
+        if ($file['error'] === UPLOAD_ERR_OK) {
+            $allowed_types = ['image/jpeg', 'image/png', 'image/gif', 'image/webp'];
+            $finfo = finfo_open(FILEINFO_MIME_TYPE);
+            $mime_type = finfo_file($finfo, $file['tmp_name']);
+            finfo_close($finfo);
+
+            if (!in_array($mime_type, $allowed_types)) {
+                http_response_code(400);
+                die(json_encode(["status" => "error", "message" => "Invalid image type"]));
+            }
+
+            if ($file['size'] > 5 * 1024 * 1024) {
+                http_response_code(400);
+                die(json_encode(["status" => "error", "message" => "File too large (max 5MB)"]));
+            }
+
+            // Create directories
+            $upload_base = __DIR__ . '/uploads/gcash_receipts/';
+            $year_dir = $upload_base . date('Y') . '/';
+            $month_dir = $year_dir . date('m') . '/';
+
+            if (!is_dir($upload_base)) @mkdir($upload_base, 0755, true);
+            if (!is_dir($year_dir)) @mkdir($year_dir, 0755, true);
+            if (!is_dir($month_dir)) @mkdir($month_dir, 0755, true);
+
+            // Generate filename
+            $receipt_filename = 'receipt_' . $customer_id . '_' . time() . '.jpg';
+            $receipt_path = $month_dir . $receipt_filename;
+
+            if (!move_uploaded_file($file['tmp_name'], $receipt_path)) {
+                http_response_code(500);
+                die(json_encode(["status" => "error", "message" => "Failed to upload file"]));
+            }
+
+            // Store relative path
+            $receipt_path = 'uploads/gcash_receipts/' . date('Y') . '/' . date('m') . '/' . $receipt_filename;
         }
-
-        if ($file['size'] > 5 * 1024 * 1024) {
-            http_response_code(400);
-            echo json_encode(["status" => "error", "message" => "File too large"]);
-            $conn->close();
-            ob_end_flush();
-            exit;
-        }
-
-        if ($file['error'] !== UPLOAD_ERR_OK) {
-            http_response_code(400);
-            echo json_encode(["status" => "error", "message" => "Upload error"]);
-            $conn->close();
-            ob_end_flush();
-            exit;
-        }
-
-        // Create upload directory
-        $upload_dir = __DIR__ . '/uploads/gcash_receipts/' . date('Y') . '/' . date('m') . '/';
-        if (!is_dir($upload_dir)) {
-            mkdir($upload_dir, 0755, true);
-        }
-
-        // Generate unique filename
-        $receipt_filename = 'receipt_' . $customer_id . '_' . time() . '_' . md5_file($file['tmp_name']) . '.jpg';
-        $receipt_path = $upload_dir . $receipt_filename;
-
-        // Move uploaded file
-        if (!move_uploaded_file($file['tmp_name'], $receipt_path)) {
-            http_response_code(500);
-            echo json_encode(["status" => "error", "message" => "Failed to save receipt"]);
-            $conn->close();
-            ob_end_flush();
-            exit;
-        }
-
-        // Store relative path for database
-        $receipt_path = 'uploads/gcash_receipts/' . date('Y') . '/' . date('m') . '/' . $receipt_filename;
     }
 
     // ============================================================
-    // START TRANSACTION
+    // DATABASE TRANSACTION
     // ============================================================
 
     $conn->begin_transaction();
 
-    // ============================================================
-    // FIND LATEST RESERVATION
-    // ============================================================
-
-    $find_res_sql = "SELECT ReservationID FROM reservations 
-                     WHERE CustomerID = ? 
-                     ORDER BY ReservationID DESC LIMIT 1";
-    
-    $find_res_stmt = $conn->prepare($find_res_sql);
-    
-    if (!$find_res_stmt) {
-        $conn->rollback();
-        http_response_code(500);
-        echo json_encode(["status" => "error", "message" => "Database error"]);
-        $conn->close();
-        ob_end_flush();
-        exit;
-    }
-
-    $find_res_stmt->bind_param("i", $customer_id);
-    $find_res_stmt->execute();
-    $res_result = $find_res_stmt->get_result();
-
-    if ($res_result->num_rows === 0) {
-        $conn->rollback();
-        http_response_code(404);
-        echo json_encode(["status" => "error", "message" => "Reservation not found"]);
-        $find_res_stmt->close();
-        $conn->close();
-        ob_end_flush();
-        exit;
-    }
-
-    $reservation_row = $res_result->fetch_assoc();
-    $reservation_id = intval($reservation_row['ReservationID']);
-    $find_res_stmt->close();
-
-    // ============================================================
-    // UPDATE RESERVATION WITH DELIVERY & SPECIAL REQUESTS
-    // ============================================================
-
-    $update_reservation_sql = "UPDATE reservations 
-                               SET DeliveryOption = ?,
-                                   DeliveryAddress = ?,
-                                   SpecialRequests = ?
-                               WHERE ReservationID = ?";
-    
-    $update_res_stmt = $conn->prepare($update_reservation_sql);
-    
-    if (!$update_res_stmt) {
-        $conn->rollback();
-        http_response_code(500);
-        echo json_encode(["status" => "error", "message" => "Database error"]);
-        $conn->close();
-        ob_end_flush();
-        exit;
-    }
-
-    $update_res_stmt->bind_param(
-        "sssi",
-        $delivery_option,
-        $delivery_address,
-        $special_requests,
-        $reservation_id
-    );
-
-    if (!$update_res_stmt->execute()) {
-        $conn->rollback();
-        http_response_code(500);
-        echo json_encode(["status" => "error", "message" => "Failed to update reservation"]);
-        $update_res_stmt->close();
-        $conn->close();
-        ob_end_flush();
-        exit;
-    }
-
-    $update_res_stmt->close();
-
-    // ============================================================
-    // DELETE PLACEHOLDER ITEMS
-    // ============================================================
-
-    $delete_sql = "DELETE FROM reservation_items 
-                   WHERE ReservationID = ? AND ProductName = 'Menu Selection Pending'";
-    
-    $delete_stmt = $conn->prepare($delete_sql);
-    
-    if ($delete_stmt) {
-        $delete_stmt->bind_param("i", $reservation_id);
-        $delete_stmt->execute();
-        $delete_stmt->close();
-    }
-
-    // ============================================================
-    // INSERT SELECTED PRODUCTS
-    // ============================================================
-
-    $insert_sql = "INSERT INTO reservation_items 
-                   (ReservationID, ProductName, Quantity, UnitPrice, TotalPrice) 
-                   VALUES (?, ?, ?, ?, ?)";
-
-    $insert_stmt = $conn->prepare($insert_sql);
-
-    if (!$insert_stmt) {
-        $conn->rollback();
-        http_response_code(500);
-        echo json_encode(["status" => "error", "message" => "Database error"]);
-        $conn->close();
-        ob_end_flush();
-        exit;
-    }
-
-    foreach ($products as $product) {
-        $product_name = isset($product['name']) ? $product['name'] : '';
-        $quantity = isset($product['quantity']) ? intval($product['quantity']) : 0;
-        $unit_price = isset($product['price']) ? floatval($product['price']) : 0;
-        $item_total = $quantity * $unit_price;
-
-        if (empty($product_name) || $quantity <= 0) {
-            continue;
+    try {
+        // Find or create reservation
+        $sql = "SELECT ReservationID FROM reservations WHERE CustomerID = ? ORDER BY ReservationID DESC LIMIT 1";
+        $stmt = $conn->prepare($sql);
+        
+        if (!$stmt) {
+            throw new Exception("Prepare error: " . $conn->error);
         }
 
-        $insert_stmt->bind_param(
-            "isidi",
-            $reservation_id,
-            $product_name,
-            $quantity,
-            $unit_price,
-            $item_total
-        );
+        $stmt->bind_param("i", $customer_id);
+        $stmt->execute();
+        $result = $stmt->get_result();
 
-        if (!$insert_stmt->execute()) {
-            $conn->rollback();
-            http_response_code(500);
-            echo json_encode(["status" => "error", "message" => "Failed to save products"]);
-            $insert_stmt->close();
-            $conn->close();
-            ob_end_flush();
-            exit;
+        if ($result->num_rows > 0) {
+            $row = $result->fetch_assoc();
+            $reservation_id = intval($row['ReservationID']);
+        } else {
+            // Create new reservation
+            $sql = "INSERT INTO reservations 
+                    (CustomerID, ReservationType, EventType, EventDate, EventTime, 
+                     NumberOfGuests, ServiceType, ContactNumber, ReservationStatus,
+                     DeliveryOption, SpecialRequests)
+                    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+            
+            $stmt = $conn->prepare($sql);
+            if (!$stmt) {
+                throw new Exception("Insert prepare error: " . $conn->error);
+            }
+
+            $reservation_type = 'Online';
+            $service_type = 'Catering Only';
+            $status = 'Pending';
+
+            $stmt->bind_param(
+                "issssssssss",
+                $customer_id,
+                $reservation_type,
+                $event_type,
+                $event_date,
+                $event_time,
+                $guests,
+                $service_type,
+                $customer_phone,
+                $status,
+                $delivery_option,
+                $special_requests
+            );
+
+            if (!$stmt->execute()) {
+                throw new Exception("Insert execute error: " . $stmt->error);
+            }
+
+            $reservation_id = $conn->insert_id;
         }
-    }
 
-    $insert_stmt->close();
+        $stmt->close();
 
-    // ============================================================
-    // UPDATE PAYMENT RECORD WITH GCASH RECEIPT
-    // ============================================================
+        // Update delivery address if delivery selected
+        if ($delivery_option === 'Delivery' && !empty($delivery_address)) {
+            $sql = "UPDATE reservations SET DeliveryAddress = ? WHERE ReservationID = ?";
+            $stmt = $conn->prepare($sql);
+            if ($stmt) {
+                $stmt->bind_param("si", $delivery_address, $reservation_id);
+                $stmt->execute();
+                $stmt->close();
+            }
+        }
 
-    $update_payment_sql = "UPDATE reservation_payments 
-                           SET PaymentMethod = ?,
-                               PaymentStatus = ?,
-                               AmountPaid = ?,
-                               ProofOfPayment = ?,
-                               ReceiptFileName = ?
-                           WHERE ReservationID = ?";
+        // Delete old items
+        $sql = "DELETE FROM reservation_items WHERE ReservationID = ?";
+        $stmt = $conn->prepare($sql);
+        if ($stmt) {
+            $stmt->bind_param("i", $reservation_id);
+            $stmt->execute();
+            $stmt->close();
+        }
 
-    $update_payment_stmt = $conn->prepare($update_payment_sql);
-
-    if ($update_payment_stmt) {
-        $payment_status = ($payment_method === 'GCash' && $receipt_path) ? 'Pending' : 'Pending';
+        // Insert products
+        $sql = "INSERT INTO reservation_items (ReservationID, ProductName, Quantity, UnitPrice, TotalPrice) VALUES (?, ?, ?, ?, ?)";
+        $stmt = $conn->prepare($sql);
         
-        $update_payment_stmt->bind_param(
-            "ssdssi",
-            $payment_method,
-            $payment_status,
-            $total_price,
-            $receipt_path,
-            $receipt_filename,
-            $reservation_id
-        );
+        if (!$stmt) {
+            throw new Exception("Insert items prepare error: " . $conn->error);
+        }
+
+        foreach ($products as $product) {
+            $product_name = isset($product['name']) ? trim($product['name']) : '';
+            $quantity = isset($product['quantity']) ? intval($product['quantity']) : 0;
+            $unit_price = isset($product['price']) ? floatval($product['price']) : 0;
+            $item_total = $quantity * $unit_price;
+
+            if (empty($product_name) || $quantity <= 0) continue;
+
+            $stmt->bind_param("isidi", $reservation_id, $product_name, $quantity, $unit_price, $item_total);
+            
+            if (!$stmt->execute()) {
+                throw new Exception("Insert items execute error: " . $stmt->error);
+            }
+        }
+
+        $stmt->close();
+
+        // Check if payment record exists
+        $sql = "SELECT ReservationPaymentID FROM reservation_payments WHERE ReservationID = ?";
+        $stmt = $conn->prepare($sql);
+        $stmt->bind_param("i", $reservation_id);
+        $stmt->execute();
+        $payment_result = $stmt->get_result();
+        $stmt->close();
+
+        if ($payment_result->num_rows === 0) {
+            // Create payment record
+            $sql = "INSERT INTO reservation_payments 
+                    (ReservationID, PaymentMethod, PaymentStatus, AmountPaid, PaymentSource, ProofOfPayment, ReceiptFileName)
+                    VALUES (?, ?, ?, ?, ?, ?, ?)";
+            
+            $stmt = $conn->prepare($sql);
+            if (!$stmt) {
+                throw new Exception("Insert payment prepare error: " . $conn->error);
+            }
+
+            $status = 'Pending';
+            $source = 'Website';
+
+            $stmt->bind_param("isdsiss", $reservation_id, $payment_method, $status, $total_price, $source, $receipt_path, $receipt_filename);
+            
+            if (!$stmt->execute()) {
+                throw new Exception("Insert payment execute error: " . $stmt->error);
+            }
+
+            $stmt->close();
+        } else {
+            // Update payment record
+            $sql = "UPDATE reservation_payments 
+                    SET PaymentMethod = ?, AmountPaid = ?, ProofOfPayment = ?, ReceiptFileName = ?, PaymentStatus = ?
+                    WHERE ReservationID = ?";
+            
+            $stmt = $conn->prepare($sql);
+            if ($stmt) {
+                $status = 'Pending';
+                $stmt->bind_param("sdssi", $payment_method, $total_price, $receipt_path, $receipt_filename, $status, $reservation_id);
+                $stmt->execute();
+                $stmt->close();
+            }
+        }
+
+        // Commit transaction
+        $conn->commit();
+
+        // Log success
+        error_log("SUCCESS: Reservation $reservation_id created/updated for customer $customer_id");
+
+        http_response_code(201);
+        echo json_encode([
+            "status" => "success",
+            "message" => "Reservation saved successfully!",
+            "reservation_id" => $reservation_id,
+            "total_amount" => $total_price
+        ]);
+
+    } catch (Exception $e) {
+        $conn->rollback();
+        error_log("ERROR: " . $e->getMessage());
         
-        $update_payment_stmt->execute();
-        $update_payment_stmt->close();
+        http_response_code(500);
+        echo json_encode([
+            "status" => "error",
+            "message" => "Database error: " . $e->getMessage()
+        ]);
     }
 
-    // ============================================================
-    // LOG TRANSACTION
-    // ============================================================
-
-    $log_sql = "INSERT INTO customer_logs 
-                (CustomerID, TransactionType, Details) 
-                VALUES (?, ?, ?)";
-
-    $log_stmt = $conn->prepare($log_sql);
-
-    if ($log_stmt) {
-        $transaction_type = 'RESERVATION_COMPLETED';
-        $details = "GCash Payment received. Reservation #" . $reservation_id . " with " . count($products) . " items. " . 
-                   "Delivery: " . $delivery_option . ". Special requests: " . substr($special_requests, 0, 50);
-
-        $log_stmt->bind_param(
-            "iss",
-            $customer_id,
-            $transaction_type,
-            $details
-        );
-
-        $log_stmt->execute();
-        $log_stmt->close();
-    }
-
-    // ============================================================
-    // COMMIT TRANSACTION
-    // ============================================================
-
-    $conn->commit();
     $conn->close();
 
-    // ============================================================
-    // SUCCESS RESPONSE
-    // ============================================================
-
-    http_response_code(201);
-    echo json_encode([
-        "status" => "success",
-        "message" => "Reservation saved successfully!",
-        "reservation_id" => $reservation_id,
-        "total_amount" => $total_price,
-        "product_count" => count($products),
-        "payment_method" => $payment_method,
-        "delivery_option" => $delivery_option
-    ]);
-
-    ob_end_flush();
-    exit;
-
 } catch (Exception $e) {
+    error_log("FATAL ERROR: " . $e->getMessage());
+    
     http_response_code(500);
     echo json_encode([
         "status" => "error",
-        "message" => "An error occurred: " . $e->getMessage()
+        "message" => "Server error: " . $e->getMessage()
     ]);
-    ob_end_flush();
-    exit;
 }
 
 ob_end_flush();

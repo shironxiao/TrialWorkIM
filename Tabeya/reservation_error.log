@@ -1,0 +1,31 @@
+[22-Nov-2025 07:48:14 Europe/Berlin] SUCCESS: Reservation 1 created/updated for customer 7
+[22-Nov-2025 07:55:04 Europe/Berlin] PHP Fatal error:  Uncaught ArgumentCountError: The number of elements in the type definition string must match the number of bind variables in D:\XAMPP\htdocs\TrialWeb\TrialWorkIM\Tabeya\save_product_reservation.php:303
+Stack trace:
+#0 D:\XAMPP\htdocs\TrialWeb\TrialWorkIM\Tabeya\save_product_reservation.php(303): mysqli_stmt->bind_param('sdssi', 'GCash', 750.0, 'uploads/gcash_r...', 'receipt_7_17637...', 'Pending', 1)
+#1 {main}
+  thrown in D:\XAMPP\htdocs\TrialWeb\TrialWorkIM\Tabeya\save_product_reservation.php on line 303
+[22-Nov-2025 07:56:05 Europe/Berlin] PHP Fatal error:  Uncaught ArgumentCountError: The number of elements in the type definition string must match the number of bind variables in D:\XAMPP\htdocs\TrialWeb\TrialWorkIM\Tabeya\save_product_reservation.php:303
+Stack trace:
+#0 D:\XAMPP\htdocs\TrialWeb\TrialWorkIM\Tabeya\save_product_reservation.php(303): mysqli_stmt->bind_param('sdssi', 'GCash', 750.0, 'uploads/gcash_r...', 'receipt_7_17637...', 'Pending', 1)
+#1 {main}
+  thrown in D:\XAMPP\htdocs\TrialWeb\TrialWorkIM\Tabeya\save_product_reservation.php on line 303
+[22-Nov-2025 07:56:33 Europe/Berlin] PHP Fatal error:  Uncaught ArgumentCountError: The number of elements in the type definition string must match the number of bind variables in D:\XAMPP\htdocs\TrialWeb\TrialWorkIM\Tabeya\save_product_reservation.php:303
+Stack trace:
+#0 D:\XAMPP\htdocs\TrialWeb\TrialWorkIM\Tabeya\save_product_reservation.php(303): mysqli_stmt->bind_param('sdssi', 'GCash', 930.0, 'uploads/gcash_r...', 'receipt_7_17637...', 'Pending', 1)
+#1 {main}
+  thrown in D:\XAMPP\htdocs\TrialWeb\TrialWorkIM\Tabeya\save_product_reservation.php on line 303
+[22-Nov-2025 07:58:12 Europe/Berlin] PHP Fatal error:  Uncaught ArgumentCountError: The number of elements in the type definition string must match the number of bind variables in D:\XAMPP\htdocs\TrialWeb\TrialWorkIM\Tabeya\save_product_reservation.php:303
+Stack trace:
+#0 D:\XAMPP\htdocs\TrialWeb\TrialWorkIM\Tabeya\save_product_reservation.php(303): mysqli_stmt->bind_param('sdssi', 'GCash', 930.0, 'uploads/gcash_r...', 'receipt_7_17637...', 'Pending', 1)
+#1 {main}
+  thrown in D:\XAMPP\htdocs\TrialWeb\TrialWorkIM\Tabeya\save_product_reservation.php on line 303
+[22-Nov-2025 07:58:23 Europe/Berlin] PHP Fatal error:  Uncaught ArgumentCountError: The number of elements in the type definition string must match the number of bind variables in D:\XAMPP\htdocs\TrialWeb\TrialWorkIM\Tabeya\save_product_reservation.php:303
+Stack trace:
+#0 D:\XAMPP\htdocs\TrialWeb\TrialWorkIM\Tabeya\save_product_reservation.php(303): mysqli_stmt->bind_param('sdssi', 'GCash', 930.0, 'uploads/gcash_r...', 'receipt_7_17637...', 'Pending', 1)
+#1 {main}
+  thrown in D:\XAMPP\htdocs\TrialWeb\TrialWorkIM\Tabeya\save_product_reservation.php on line 303
+[22-Nov-2025 08:00:15 Europe/Berlin] PHP Fatal error:  Uncaught ArgumentCountError: The number of elements in the type definition string must match the number of bind variables in D:\XAMPP\htdocs\TrialWeb\TrialWorkIM\Tabeya\save_product_reservation.php:303
+Stack trace:
+#0 D:\XAMPP\htdocs\TrialWeb\TrialWorkIM\Tabeya\save_product_reservation.php(303): mysqli_stmt->bind_param('sdssi', 'GCash', 750.0, 'uploads/gcash_r...', 'receipt_7_17637...', 'Pending', 1)
+#1 {main}
+  thrown in D:\XAMPP\htdocs\TrialWeb\TrialWorkIM\Tabeya\save_product_reservation.php on line 303

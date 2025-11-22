@@ -968,7 +968,21 @@
             body.append('delivery_option', deliveryOption);
             body.append('delivery_address', deliveryAddress);
 
-            const res = await fetch('save_product_reservation.php', {
+            // Get current page path and construct correct PHP file path
+            const currentPath = window.location.pathname;
+            console.log('Current path:', currentPath);
+            
+            // Determine the base URL
+            let phpPath = 'save_product_reservation.php';
+            
+            // If we're in a subdirectory, adjust the path
+            if (currentPath.includes('/Tabeya/') || currentPath.includes('/tabeya/')) {
+                phpPath = window.location.origin + '/TrialWeb/TrialWorkIM/Tabeya/save_product_reservation.php';
+            }
+            
+            console.log('Using PHP path:', phpPath);
+
+            const res = await fetch(phpPath, {
                 method: 'POST',
                 body,
                 headers: { 'X-Requested-With': 'XMLHttpRequest' }
