@@ -14,10 +14,7 @@ ini_set('error_log', __DIR__ . '/inventory_deduction.log');
 
 header('Content-Type: application/json; charset=utf-8');
 
-$servername = "localhost";
-$username = "root";
-$password = "";
-$dbname = "tabeya_system";
+ require_once(__DIR__ . '/api/config/db_config.php');
 
 try {
     if ($_SERVER['REQUEST_METHOD'] !== 'POST') {

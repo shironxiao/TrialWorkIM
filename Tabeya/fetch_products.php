@@ -10,7 +10,10 @@ ini_set('display_errors', 0);
 ini_set('log_errors', 1);
 ini_set('error_log', __DIR__ . '/error.log');
 
-header('Content-Type: application/json; charset=utf-8');
+// Database connection
+
+   require_once(__DIR__ . '/api/config/db_config.php');
+   header('Content-Type: application/json; charset=utf-8');
 
 try {
     $conn = new mysqli("localhost", "root", "", "tabeya_system");

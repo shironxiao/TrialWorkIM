@@ -2,10 +2,7 @@
 
 // --- 1. CONFIGURATION & DATABASE CONNECTION ---
 // Adjust these to match your XAMPP setup
-$servername = "localhost";
-$username = "root";
-$password = "";
-$dbname = "tabeya_system";
+ require_once(__DIR__ . '/api/config/db_config.php');
 
 // The directory relative to this PHP script where files will be saved
 // Ensure this folder exists: C:\xampp\htdocs\TrialWorkIM-main\Tabeya\uploads\products\

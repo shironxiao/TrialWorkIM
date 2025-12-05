@@ -27,16 +27,9 @@ set_exception_handler(function($e) {
 });
 
 // Database connection
-$conn = new mysqli('localhost', 'root', '', 'tabeya_system');
+  require_once(__DIR__ . '/api/config/db_config.php');
 
-if ($conn->connect_error) {
-    if (ob_get_level()) ob_clean();
-    http_response_code(500);
-    echo json_encode(['success' => false, 'message' => 'Database connection failed']);
-    exit;
-}
 
-$conn->set_charset("utf8mb4");
 
 try {
     // Check method

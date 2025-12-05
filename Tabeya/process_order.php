@@ -1,18 +1,6 @@
 <?php
 // Tiyakin na ang file na ito ay makokonekta sa inyong database.
-$servername = "localhost";
-$username = "root"; 
-$password = ""; 
-$dbname = "tabeya_system"; 
-
-// --- 1. Database Connection ---
-$conn = new mysqli($servername, $username, $password, $dbname);
-
-// Check connection
-if ($conn->connect_error) {
-    die("Connection failed: " . $conn->connect_error);
-}
-
+ require_once(__DIR__ . '/api/config/db_config.php');
 // --- 2. Check for POST Data ---
 if ($_SERVER["REQUEST_METHOD"] !== "POST") {
     header("Location: Menu.html");

@@ -19,12 +19,7 @@ try {
     }
 
     // Database connection
-    $conn = new mysqli("localhost", "root", "", "tabeya_system");
-    if ($conn->connect_error) {
-        http_response_code(500);
-        die(json_encode(["status" => "error", "message" => "Database connection failed"]));
-    }
-    $conn->set_charset("utf8mb4");
+      require_once(__DIR__ . '/api/config/db_config.php');
 
     // Parse input data
     $customer_id = isset($_POST['customer_id']) ? intval($_POST['customer_id']) : 0;

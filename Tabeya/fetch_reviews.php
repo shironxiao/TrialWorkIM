@@ -1,17 +1,6 @@
 <?php
 // Database connection details
-$servername = "localhost";
-$username = "root";
-$password = "";
-$dbname = "tabeya_system";
-
-// Create connection
-$conn = new mysqli($servername, $username, $password, $dbname);
-
-// Check connection
-if ($conn->connect_error) {
-    die(json_encode(['error' => 'Connection failed: ' . $conn->connect_error]));
-}
+ require_once(__DIR__ . '/api/config/db_config.php');
 
 // Fetch only approved reviews
 $sql = "SELECT review_id, user_name, user_review, user_rating FROM review_table WHERE status = 'Approved' ORDER BY datetime DESC";
