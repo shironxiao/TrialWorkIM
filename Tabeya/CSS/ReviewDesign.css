@@ -33,7 +33,7 @@ header .logo img {
   max-width: 120px;
   height: auto;
 }
-/* Update Navigation Links */
+
 nav {
   display: flex;
   gap: 20px;
@@ -53,7 +53,6 @@ nav a:active {
 nav a.active {
   color: yellow;
 }
-
 
 .background {
   position: relative;
@@ -87,7 +86,6 @@ nav a.active {
   z-index: 1;
   top: 35px;
 }
-
 
 .review-header {
   display: flex;
@@ -149,7 +147,7 @@ nav a.active {
 
 .progress-bar-fill {
   height: 100%;
-  background-color: rgb(188, 24, 35);
+  background-color: #FFD700;
 }
 
 .review-button {
@@ -170,6 +168,174 @@ nav a.active {
 .btn:hover {
   background-color: #ff5c5c;
 }
+
+/* ✅ CATEGORY BREAKDOWN SECTION */
+.category-breakdown {
+  margin: 30px 0;
+  padding: 20px;
+  background: #f9f9f9;
+  border-radius: 10px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+}
+
+.category-breakdown h4 {
+  color: rgb(188, 24, 35);
+  font-size: 18px;
+  margin-bottom: 20px;
+  text-align: center;
+  font-weight: 600;
+}
+
+.category-bar {
+  display: flex;
+  align-items: center;
+  margin-bottom: 15px;
+  gap: 15px;
+}
+
+.cat-label {
+  min-width: 120px;
+  font-size: 14px;
+  font-weight: 600;
+  color: #333;
+}
+
+.cat-bar {
+  flex: 1;
+  height: 12px;
+  background-color: #e0e0e0;
+  border-radius: 6px;
+  overflow: hidden;
+  position: relative;
+}
+
+.cat-bar-fill {
+  height: 100%;
+  background: linear-gradient(90deg, #FFD700 0%, #FFA500 100%);
+  border-radius: 6px;
+  transition: width 0.4s ease;
+  box-shadow: 0 2px 4px rgba(255, 215, 0, 0.3);
+}
+
+.cat-value {
+  min-width: 40px;
+  text-align: right;
+  font-weight: 700;
+  color: rgb(188, 24, 35);
+  font-size: 14px;
+}
+
+/* ✅ ACCORDION STYLES */
+.review-comments-accordion {
+  margin-top: 15px;
+  border-top: 1px solid #e0e0e0;
+  padding-top: 10px;
+}
+
+.accordion-toggle {
+  background: none;
+  border: none;
+  color: rgb(188, 24, 35);
+  font-weight: 600;
+  cursor: pointer;
+  padding: 8px 0;
+  font-size: 14px;
+  transition: color 0.2s ease;
+  display: block;
+  width: 100%;
+  text-align: left;
+}
+
+.accordion-toggle:hover {
+  color: #ff5c5c;
+}
+
+.accordion-content {
+  max-height: 0;
+  overflow: hidden;
+  transition: max-height 0.3s ease;
+}
+
+.accordion-content.show {
+  max-height: 1000px;
+  transition: max-height 0.5s ease;
+}
+
+.comment-item {
+  margin: 12px 0;
+  padding-left: 15px;
+  border-left: 3px solid rgb(188, 24, 35);
+}
+
+.comment-label {
+  font-weight: 600;
+  color: rgb(188, 24, 35);
+  font-size: 13px;
+  margin-bottom: 5px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.comment-text {
+  color: #555;
+  font-size: 14px;
+  line-height: 1.6;
+  padding: 8px 12px;
+  background: #fff;
+  border-radius: 4px;
+  border: 1px solid #e8e8e8;
+}
+
+/* ✅ STAR STYLING - CONSISTENT GOLD COLOR */
+.star {
+  color: #ddd;
+  font-size: 20px;
+  transition: color 0.2s ease;
+}
+
+.star.active {
+  color: #FFD700;
+}
+
+.star.half-star {
+  position: relative;
+  overflow: hidden;
+  color: #ddd;
+}
+
+.star.half-star::before {
+  content: '★';
+  position: absolute;
+  left: 0;
+  width: 50%;
+  overflow: hidden;
+  color: #FFD700;
+}
+
+/* Review detail badges */
+.review-detail-ratings {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin: 10px 0;
+}
+
+.rating-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 4px 10px;
+  background: #f0f0f0;
+  border-radius: 12px;
+  font-size: 12px;
+  color: #555;
+}
+
+.rating-badge .stars {
+  color: #FFD700;
+  font-size: 14px;
+}
+
 .review-modal {
   display: none;
   position: fixed;
@@ -203,9 +369,14 @@ nav a.active {
   color: #e0e0e0;
   cursor: pointer;
   margin: 0 5px;
+  transition: color 0.2s ease;
 }
 
 .rating-star.active {
+  color: #FFD700;
+}
+
+.rating-star:hover {
   color: #FFD700;
 }
 
@@ -226,6 +397,7 @@ nav a.active {
   border-radius: 5px;
   cursor: pointer;
 }
+
 #close-modal-btn:hover,
 .submit-review-btn:hover {
   background-color: #ff5c5c;
@@ -240,6 +412,7 @@ nav a.active {
   border-radius: 10px;
   padding: 15px;
   margin-bottom: 15px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
 }
 
 .user-review .review-header {
@@ -257,27 +430,7 @@ nav a.active {
 .user-review .review-rating .star.active {
   color: #FFD700;
 }
-.star {
-  color: #ddd; /* Default star color */
-}
 
-.star.active {
-  color: gold; /* Active star color */
-}
-
-.star.half-star {
-  position: relative;
-  overflow: hidden;
-}
-
-.star.half-star::before {
-  content: '★';
-  position: absolute;
-  left: 0;
-  width: 50%;
-  overflow: hidden;
-  color: gold;
-}
 /*Footer Styling*/
 .contact-section {
   background-color: rgba(188, 24, 35, 0.9);
@@ -305,7 +458,6 @@ nav a.active {
 .contact-info p {
   font-size: 1em;
   color: rgb(255, 255, 255);
-  
 }
 
 .info-group {
@@ -315,6 +467,7 @@ nav a.active {
   flex-wrap: nowrap; 
   gap: 20px; 
 }
+
 .info-item.visit-us {
   margin-right: 130px; 
 }
@@ -344,6 +497,7 @@ nav a.active {
 .no-underline:hover {
   text-decoration: underline;
 }
+
 /* Tablet Styles (768px - 1024px) */
 @media (max-width: 1024px) {
   body {
@@ -372,7 +526,6 @@ nav a.active {
     text-align: center;
   }
 
-  /* Footer Responsive Adjustments */
   .info-group {
     flex-direction: column;
     align-items: center;
@@ -381,6 +534,11 @@ nav a.active {
   .info-item.visit-us,
   .info-item.connect-us {
     margin: 10px 0;
+  }
+
+  .cat-label {
+    min-width: 100px;
+    font-size: 13px;
   }
 }
 
@@ -405,7 +563,6 @@ nav a.active {
     text-align: center;
   }
 
-  /* Footer Responsive Adjustments */
   .contact-section {
     padding: 10px;
   }
@@ -424,5 +581,18 @@ nav a.active {
   .info-item.connect-us {
     margin: 10px 0;
   }
-}
 
+  .category-bar {
+    flex-direction: column;
+    gap: 8px;
+    align-items: flex-start;
+  }
+
+  .cat-label {
+    min-width: auto;
+  }
+
+  .cat-value {
+    text-align: left;
+  }
+}

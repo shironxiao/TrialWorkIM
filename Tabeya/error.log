@@ -233,3 +233,22 @@ Stack trace:
 #2 {main}
   thrown in D:\XAMPP\htdocs\TrialWeb\TrialWorkIM\Tabeya\api\config\db_config.php on line 66
 [05-Dec-2025 18:07:16 Europe/Berlin] SUCCESS: New reservation #11 created for customer 2
+[05-Dec-2025 18:58:59 Europe/Berlin] SUCCESS: New reservation #12 created for customer 2
+[06-Dec-2025 08:08:10 Europe/Berlin] PHP Fatal error:  Uncaught mysqli_sql_exception: No connection could be made because the target machine actively refused it in D:\XAMPP\htdocs\TrialWeb\TrialWorkIM\Tabeya\api\config\db_config.php:28
+Stack trace:
+#0 D:\XAMPP\htdocs\TrialWeb\TrialWorkIM\Tabeya\api\config\db_config.php(28): mysqli->__construct('localhost', 'root', Object(SensitiveParameterValue), 'tabeya_system', '3306')
+#1 D:\XAMPP\htdocs\TrialWeb\TrialWorkIM\Tabeya\Review.php(3): require_once('D:\\XAMPP\\htdocs...')
+#2 {main}
+  thrown in D:\XAMPP\htdocs\TrialWeb\TrialWorkIM\Tabeya\api\config\db_config.php on line 28
+[06-Dec-2025 08:08:17 Europe/Berlin] PHP Fatal error:  Uncaught mysqli_sql_exception: No connection could be made because the target machine actively refused it in D:\XAMPP\htdocs\TrialWeb\TrialWorkIM\Tabeya\api\config\db_config.php:28
+Stack trace:
+#0 D:\XAMPP\htdocs\TrialWeb\TrialWorkIM\Tabeya\api\config\db_config.php(28): mysqli->__construct('localhost', 'root', Object(SensitiveParameterValue), 'tabeya_system', '3306')
+#1 D:\XAMPP\htdocs\TrialWeb\TrialWorkIM\Tabeya\Review.php(3): require_once('D:\\XAMPP\\htdocs...')
+#2 {main}
+  thrown in D:\XAMPP\htdocs\TrialWeb\TrialWorkIM\Tabeya\api\config\db_config.php on line 28
+[06-Dec-2025 08:08:23 Europe/Berlin] PHP Fatal error:  Uncaught mysqli_sql_exception: No connection could be made because the target machine actively refused it in D:\XAMPP\htdocs\TrialWeb\TrialWorkIM\Tabeya\api\config\db_config.php:28
+Stack trace:
+#0 D:\XAMPP\htdocs\TrialWeb\TrialWorkIM\Tabeya\api\config\db_config.php(28): mysqli->__construct('localhost', 'root', Object(SensitiveParameterValue), 'tabeya_system', '3306')
+#1 D:\XAMPP\htdocs\TrialWeb\TrialWorkIM\Tabeya\Review.php(3): require_once('D:\\XAMPP\\htdocs...')
+#2 {main}
+  thrown in D:\XAMPP\htdocs\TrialWeb\TrialWorkIM\Tabeya\api\config\db_config.php on line 28

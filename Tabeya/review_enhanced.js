@@ -42,11 +42,19 @@ function updateAccountLink() {
     }
 }
 
-function toggleAccordion(btn) {
+// ✅ FIXED: Make toggleAccordion globally accessible
+window.toggleAccordion = function(btn) {
     const content = btn.nextElementSibling;
-    content.classList.toggle('show');
-    btn.textContent = content.classList.contains('show') ? 'Hide detailed feedback ▲' : 'View detailed feedback ▼';
-}
+    const isShowing = content.classList.contains('show');
+    
+    if (isShowing) {
+        content.classList.remove('show');
+        btn.textContent = 'View detailed feedback ▼';
+    } else {
+        content.classList.add('show');
+        btn.textContent = 'Hide detailed feedback ▲';
+    }
+};
 
 document.addEventListener('DOMContentLoaded', () => {
     currentUser = getCurrentUser();
@@ -221,9 +229,8 @@ function selectReservation(reservationId) {
 function formatDate(dateStr) {
     try {
         const date = new Date(dateStr);
-        // Check if date is valid
         if (isNaN(date.getTime())) {
-            return dateStr; // Return original if invalid
+            return dateStr;
         }
         const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
         return `${months[date.getMonth()]} ${date.getDate()}, ${date.getFullYear()}`;
@@ -232,10 +239,12 @@ function formatDate(dateStr) {
         return dateStr;
     }
 }
+
 function capitalizeFirst(str) {
     return str.charAt(0).toUpperCase() + str.slice(1);
 }
 
+// ✅ FIXED: Proper star rating setup with active class
 function setupRatingStars() {
     // Overall rating
     document.querySelectorAll('#overall-stars .rating-star').forEach(star => {
@@ -245,13 +254,23 @@ function setupRatingStars() {
         });
     });
 
-    // Category ratings
+    // Category ratings - FIXED to properly toggle active class
     document.querySelectorAll('.category-stars').forEach(container => {
         const category = container.dataset.category;
         container.querySelectorAll('.star').forEach(star => {
             star.addEventListener('click', function() {
-                ratings[category] = parseInt(this.dataset.rating);
-                updateStars(`.category-stars[data-category="${category}"] .star`, ratings[category]);
+                const rating = parseInt(this.dataset.rating);
+                ratings[category] = rating;
+                
+                // Update stars in this category
+                const categoryStars = container.querySelectorAll('.star');
+                categoryStars.forEach((s, idx) => {
+                    if (idx < rating) {
+                        s.classList.add('active');
+                    } else {
+                        s.classList.remove('active');
+                    }
+                });
             });
         });
     });
@@ -259,7 +278,11 @@ function setupRatingStars() {
 
 function updateStars(selector, rating) {
     document.querySelectorAll(selector).forEach((star, idx) => {
-        star.classList.toggle('active', idx < rating);
+        if (idx < rating) {
+            star.classList.add('active');
+        } else {
+            star.classList.remove('active');
+        }
     });
 }
 
